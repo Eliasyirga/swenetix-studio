@@ -7,6 +7,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { Toast } from './components/Toast';
+import { LoadingScreen } from './components/LoadingScreen';
 import { AppRoutes } from './routes/AppRoutes';
 import { useAppDispatch } from './store/store';
 import { fetchSongsRequest } from './store/songsSlice';
@@ -67,6 +68,7 @@ const AppInner: React.FC = () => {
   if (isStartPage) {
     return (
       <>
+        <LoadingScreen />
         <AppRoutes />
         <Toast />
       </>
@@ -75,6 +77,7 @@ const AppInner: React.FC = () => {
 
   return (
     <AppContainer>
+      <LoadingScreen />
       <Sidebar />
       <MainContentArea>
         <MobileNavWrapper>
