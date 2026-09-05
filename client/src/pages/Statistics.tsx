@@ -66,7 +66,7 @@ export const Statistics: React.FC = () => {
   }, [dispatch]);
 
   if (loading && !stats) {
-    return <LoadingState message="Calculating MongoDB aggregated statistics..." />;
+    return <LoadingState message="Loading statistics..." />;
   }
 
   if (error && !stats) {
@@ -117,10 +117,10 @@ export const Statistics: React.FC = () => {
         <BarChart2 size={24} />
         <Box>
           <Heading as="h1" fontSize={5} fontWeight="bold" color="text">
-            Catalog Statistics & Analytics
+            Statistics & Analytics
           </Heading>
           <Text fontSize={1} color="textSecondary" mt="2px">
-            Real-time aggregated breakdown calculated directly via MongoDB pipeline.
+            Real-time breakdown of songs, artists, albums, and genres.
           </Text>
         </Box>
       </Flex>

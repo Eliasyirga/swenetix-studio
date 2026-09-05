@@ -3,73 +3,84 @@ import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Sparkles,
-  LayoutDashboard,
   Music2,
   BarChart3,
   PlusCircle,
   Radio,
-  Database,
   Layers,
   ChevronRight,
   Sun,
   Moon,
+  LayoutDashboard,
+  PanelLeftClose,
+  Sparkles,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/store';
-import { openCreateModal, seedSongsRequest, setGenreFilter } from '../store/songsSlice';
+import { openCreateModal, setGenreFilter } from '../store/songsSlice';
 import { useAppTheme } from '../theme/ThemeContext';
+import { useSidebar } from '../context/SidebarContext';
 import { AppTheme } from '../theme/theme';
 import { Flex, Box } from './common/Flex';
 import { Text } from './common/Text';
 
-const SidebarContainer = styled.aside`
-  width: 260px;
+const SidebarContainer = styled.aside<{ isCollapsed: boolean }>`
+  width: ${(props) => (props.isCollapsed ? '76px' : '260px')};
   background-color: ${(props) => props.theme.colors.surface};
   border-right: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  height: calc(100vh - 72px);
+  height: 100vh;
   position: sticky;
   top: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   user-select: none;
   box-shadow: ${(props) => props.theme.shadows.sm};
+  z-index: 60;
+  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 
   @media (max-width: 900px) {
     display: none;
   }
 `;
 
-const BrandSection = styled.div`
-  padding: 22px 20px 18px 20px;
+const BrandSection = styled.div<{ isCollapsed: boolean }>`
+  padding: 20px ${(props) => (props.isCollapsed ? '16px' : '20px')};
   border-bottom: 1px solid ${(props) => props.theme.colors.surfaceBorder};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.surfaceLight};
+  }
 `;
 
 const NavSection = styled.div`
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 `;
 
-const SectionTitle = styled.div`
+const SectionTitle = styled.div<{ isCollapsed: boolean }>`
   font-size: 11px;
   font-weight: 700;
   color: ${(props) => props.theme.colors.textMuted};
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 8px 12px 6px 12px;
+  padding: 6px 12px;
+  display: ${(props) => (props.isCollapsed ? 'none' : 'block')};
 `;
 
-const StyledNavLink = styled(NavLink)`
+const StyledNavLink = styled(NavLink)<{ isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 9px 12px;
-  border-radius: ${(props) => props.theme.radii.sm};
+  justify-content: ${(props) => (props.isCollapsed ? 'center' : 'space-between')};
+  padding: ${(props) => (props.isCollapsed ? '10px 0' : '10px 14px')};
+  border-radius: ${(props) => props.theme.radii.md};
   color: ${(props) => props.theme.colors.textSecondary};
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   transition: all 0.15s ease;
   text-decoration: none;
@@ -81,21 +92,22 @@ const StyledNavLink = styled(NavLink)`
 
   &.active {
     color: #FFFFFF;
-    background-color: ${(props) => props.theme.colors.primary};
+    background: linear-gradient(135deg, ${(props) => props.theme.colors.primary}, #FF4B5C);
     font-weight: 600;
+    box-shadow: 0 4px 12px rgba(217, 28, 46, 0.35);
   }
 `;
 
-const GenrePill = styled.button<{ isActive?: boolean }>`
+const GenrePill = styled.button<{ isActive?: boolean; isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: ${(props) => (props.isCollapsed ? 'center' : 'space-between')};
   width: 100%;
-  padding: 7px 12px;
-  border-radius: ${(props) => props.theme.radii.sm};
+  padding: ${(props) => (props.isCollapsed ? '8px 0' : '8px 12px')};
+  border-radius: ${(props) => props.theme.radii.md};
   background: ${(props) => (props.isActive ? props.theme.colors.primaryLight : 'transparent')};
   color: ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.textSecondary)};
-  border: none;
+  border: 1px solid ${(props) => (props.isActive ? props.theme.colors.primaryBorder : 'transparent')};
   font-size: 13px;
   cursor: pointer;
   text-align: left;
@@ -110,89 +122,78 @@ const GenrePill = styled.button<{ isActive?: boolean }>`
 const CountBadge = styled.span<{ isActive?: boolean }>`
   font-size: 11px;
   font-family: monospace;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
   background-color: ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.surfaceLight)};
   color: ${(props) => (props.isActive ? '#FFFFFF' : props.theme.colors.textMuted)};
 `;
 
-const BottomStatusBox = styled.div`
+const BottomFooterBox = styled.div`
   margin-top: auto;
-  padding: 16px;
+  padding: 14px;
   border-top: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   background-color: ${(props) => props.theme.colors.backgroundAlt};
 `;
 
-const PrimaryActionButton = styled.button`
+const PrimaryActionButton = styled.button<{ isCollapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 9px 12px;
-  border-radius: ${(props) => props.theme.radii.sm};
-  background-color: ${(props) => props.theme.colors.primary};
+  padding: ${(props) => (props.isCollapsed ? '10px 0' : '11px 14px')};
+  border-radius: ${(props) => props.theme.radii.md};
+  background: linear-gradient(135deg, ${(props) => props.theme.colors.primary}, #FF4B5C);
   border: none;
   color: #FFFFFF;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(217, 28, 46, 0.35);
 
   &:hover {
-    background-color: ${(props) => props.theme.colors.primaryHover};
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(217, 28, 46, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
-const SecondaryActionButton = styled.button`
+const ThemeSwitchBtn = styled.button<{ isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: ${(props) => (props.isCollapsed ? 'center' : 'space-between')};
   width: 100%;
-  padding: 8px 12px;
-  border-radius: ${(props) => props.theme.radii.sm};
-  background-color: transparent;
+  background: ${(props) => props.theme.colors.surface};
   border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
-  color: ${(props) => props.theme.colors.textSecondary};
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: ${(props) => props.theme.radii.md};
+  padding: ${(props) => (props.isCollapsed ? '8px 0' : '8px 12px')};
   cursor: pointer;
+  color: ${(props) => props.theme.colors.text};
+  font-size: 13px;
   transition: all 0.15s ease;
-  margin-top: 6px;
 
-  &:hover:not(:disabled) {
-    background-color: ${(props) => props.theme.colors.surfaceLight};
-    color: ${(props) => props.theme.colors.text};
+  &:hover {
     border-color: ${(props) => props.theme.colors.primary};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 `;
 
 const BrandIconBox = styled(Box)`
-  width: 36px;
-  height: 36px;
-  border-radius: ${(props) => props.theme.radii.sm};
-  background-color: ${(props) => props.theme.colors.primaryLight};
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(217, 28, 46, 0.25), rgba(217, 28, 46, 0.08));
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${(props) => props.theme.colors.primary};
-`;
-
-const StudioPill = styled.span`
-  font-size: 9px;
-  font-weight: 800;
-  color: ${(props) => props.theme.colors.primary};
-  background-color: ${(props) => props.theme.colors.primaryLight};
-  padding: 1px 5px;
-  border-radius: 4px;
-  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 `;
 
 export const Sidebar: React.FC = () => {
@@ -200,9 +201,10 @@ export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useAppTheme();
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const theme = useTheme() as AppTheme;
 
-  const { pagination, filters, actionLoading } = useAppSelector((state) => state.songs);
+  const { pagination, filters } = useAppSelector((state) => state.songs);
   const { data: stats } = useAppSelector((state) => state.statistics);
 
   const totalSongs = pagination.total || stats?.overview.totalSongs || 0;
@@ -215,86 +217,98 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  const handleSeed = () => {
-    if (window.confirm('Reset and seed database with 28 curated tracks across diverse genres?')) {
-      dispatch(seedSongsRequest());
-    }
-  };
-
   return (
-    <SidebarContainer>
-      {/* Brand Header */}
-      <BrandSection>
-        <Flex alignItems="center" gap={2}>
-          <BrandIconBox>
-            <Music2 size={20} />
-          </BrandIconBox>
-          <Box>
-            <Flex alignItems="center" gap={1}>
-              <Text fontSize={2} fontWeight="bold" color="text" letterSpacing="-0.02em">
-                Swenetix
-              </Text>
-              <StudioPill>STUDIO</StudioPill>
-            </Flex>
-            <Text fontSize={0} color="textMuted">
-              Music Engine & Analytics
-            </Text>
-          </Box>
+    <SidebarContainer isCollapsed={isCollapsed}>
+      {/* Brand Header with Interactive Pop up / Pop off Logo Toggle */}
+      <BrandSection
+        isCollapsed={isCollapsed}
+        onClick={toggleSidebar}
+        title={isCollapsed ? 'Click Logo to Expand Sidebar' : 'Click Logo to Collapse Sidebar'}
+      >
+        <Flex alignItems="center" justifyContent={isCollapsed ? 'center' : 'space-between'}>
+          <Flex alignItems="center" gap={3}>
+            <BrandIconBox>
+              <Music2 size={22} />
+            </BrandIconBox>
+            {!isCollapsed && (
+              <Box>
+                <Text fontSize={2} fontWeight="bold" color="text" letterSpacing="-0.02em">
+                  Swenetix
+                </Text>
+                <Text fontSize={0} color="textMuted">
+                  Studio
+                </Text>
+              </Box>
+            )}
+          </Flex>
+
+          {!isCollapsed && (
+            <Box color="textMuted">
+              <PanelLeftClose size={16} />
+            </Box>
+          )}
         </Flex>
       </BrandSection>
 
       {/* Main Navigation */}
       <NavSection>
-        <SectionTitle>Studio Navigation</SectionTitle>
-        <StyledNavLink to="/overview">
+        <SectionTitle isCollapsed={isCollapsed}>Menu</SectionTitle>
+        <StyledNavLink to="/" isCollapsed={isCollapsed} title="Home / Start Showcase">
           <Flex alignItems="center" gap={2}>
-            <LayoutDashboard size={16} />
-            <span>Overview Studio</span>
+            <Sparkles size={18} />
+            {!isCollapsed && <span>Showcase Home</span>}
           </Flex>
-          <ChevronRight size={14} color={theme.colors.textMuted} />
+          {!isCollapsed && <ChevronRight size={14} color={theme.colors.textMuted} />}
         </StyledNavLink>
 
-        <StyledNavLink to="/songs">
+        <StyledNavLink to="/songs" end isCollapsed={isCollapsed} title="Song Library">
           <Flex alignItems="center" gap={2}>
-            <Layers size={16} />
-            <span>Song Library</span>
+            <Layers size={18} />
+            {!isCollapsed && <span>Song Library</span>}
           </Flex>
-          <CountBadge>{totalSongs}</CountBadge>
+          {!isCollapsed && <CountBadge>{totalSongs}</CountBadge>}
         </StyledNavLink>
 
-        <StyledNavLink to="/statistics">
+        <StyledNavLink to="/statistics" isCollapsed={isCollapsed} title="Statistics">
           <Flex alignItems="center" gap={2}>
-            <BarChart3 size={16} />
-            <span>Analytics</span>
+            <BarChart3 size={18} />
+            {!isCollapsed && <span>Statistics</span>}
           </Flex>
-          <ChevronRight size={14} color={theme.colors.textMuted} />
+          {!isCollapsed && <ChevronRight size={14} color={theme.colors.textMuted} />}
+        </StyledNavLink>
+
+        <StyledNavLink to="/overview" isCollapsed={isCollapsed} title="Overview Dashboard">
+          <Flex alignItems="center" gap={2}>
+            <LayoutDashboard size={18} />
+            {!isCollapsed && <span>Overview</span>}
+          </Flex>
+          {!isCollapsed && <ChevronRight size={14} color={theme.colors.textMuted} />}
         </StyledNavLink>
       </NavSection>
 
-      {/* Quick Action Studio Tools */}
+      {/* Primary Action Button */}
       <NavSection>
-        <SectionTitle>Studio Tools</SectionTitle>
-        <PrimaryActionButton onClick={() => dispatch(openCreateModal())}>
-          <PlusCircle size={16} />
-          <span>New Song Track</span>
+        <PrimaryActionButton
+          isCollapsed={isCollapsed}
+          onClick={() => dispatch(openCreateModal())}
+          title="Add New Song"
+        >
+          <PlusCircle size={18} />
+          {!isCollapsed && <span>Add New Song</span>}
         </PrimaryActionButton>
-
-        <SecondaryActionButton onClick={handleSeed} disabled={actionLoading}>
-          <Sparkles size={14} color={theme.colors.secondary} />
-          <span>{actionLoading ? 'Seeding...' : 'Seed 28 Tracks'}</span>
-        </SecondaryActionButton>
       </NavSection>
 
-      {/* Genre Channels */}
-      {genreList.length > 0 && (
-        <NavSection style={{ flex: 1 }}>
-          <SectionTitle>Genre Spectrum</SectionTitle>
-          {genreList.slice(0, 6).map((g) => {
+      {/* Genre Filter Channels (shown when expanded) */}
+      {!isCollapsed && genreList.length > 0 && (
+        <NavSection style={{ flex: 1, overflowY: 'auto' }}>
+          <SectionTitle isCollapsed={isCollapsed}>Genres</SectionTitle>
+          {genreList.map((g) => {
             const isSelected = filters.genre === g.genre;
             return (
               <GenrePill
                 key={g.genre}
                 isActive={isSelected}
+                isCollapsed={isCollapsed}
                 onClick={() => handleGenreClick(g.genre)}
               >
                 <Flex alignItems="center" gap={2}>
@@ -308,34 +322,19 @@ export const Sidebar: React.FC = () => {
         </NavSection>
       )}
 
-      {/* System Status Footer */}
-      <BottomStatusBox>
-        <Flex alignItems="center" justifyContent="space-between" mb={1}>
+      {/* Clean Theme Toggle Footer */}
+      <BottomFooterBox>
+        <ThemeSwitchBtn
+          isCollapsed={isCollapsed}
+          onClick={toggleTheme}
+          title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+        >
           <Flex alignItems="center" gap={2}>
-            <Database size={13} color={theme.colors.secondary} />
-            <Text fontSize={0} fontWeight="semibold" color="text">
-              MongoDB 7.0
-            </Text>
+            {mode === 'light' ? <Moon size={16} color={theme.colors.primary} /> : <Sun size={16} color={theme.colors.primary} />}
+            {!isCollapsed && <span>{mode === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
           </Flex>
-          <button
-            onClick={toggleTheme}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: theme.colors.primary,
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-          >
-            {mode === 'light' ? <Moon size={14} /> : <Sun size={14} />}
-          </button>
-        </Flex>
-        <Text fontSize={0} color="textMuted">
-          {totalSongs} songs synced & aggregated
-        </Text>
-      </BottomStatusBox>
+        </ThemeSwitchBtn>
+      </BottomFooterBox>
     </SidebarContainer>
   );
 };

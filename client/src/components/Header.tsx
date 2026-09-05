@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Plus, Sun, Moon } from 'lucide-react';
+import { Search, Plus, Sun, Moon, PanelLeft } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { openCreateModal, setSearchFilter } from '../store/songsSlice';
 import { useAppTheme } from '../theme/ThemeContext';
+import { useSidebar } from '../context/SidebarContext';
 import { AppTheme } from '../theme/theme';
 import { Flex, Box } from './common/Flex';
 import { Text } from './common/Text';
@@ -68,26 +69,7 @@ const SearchIcon = styled.div`
   pointer-events: none;
 `;
 
-const KeyboardKey = styled.span`
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 10px;
-  font-family: monospace;
-  background-color: ${(props) => props.theme.colors.surface};
-  color: ${(props) => props.theme.colors.textSecondary};
-  padding: 2px 5px;
-  border-radius: 4px;
-  border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
-  pointer-events: none;
-
-  @media (max-width: 600px) {
-    display: none;
-  }
-`;
-
-const ThemeToggleButton = styled.button`
+const IconButton = styled.button`
   background: ${(props) => props.theme.colors.surfaceLight};
   border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   color: ${(props) => props.theme.colors.text};
@@ -112,12 +94,12 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useAppTheme();
+  const { toggleSidebar } = useSidebar();
   const theme = useTheme() as AppTheme;
 
   const { filters } = useAppSelector((state) => state.songs);
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
 
-  // Synchronize search term
   useEffect(() => {
     setSearchTerm(filters.search || '');
   }, [filters.search]);
@@ -134,13 +116,12 @@ export const Header: React.FC = () => {
   const getPageTitle = () => {
     switch (location.pathname) {
       case '/':
-        return 'Studio Landing & Showcase';
-      case '/overview':
-        return 'Studio Overview Dashboard';
       case '/songs':
-        return 'Song Library & Records';
+        return 'Song Library';
       case '/statistics':
-        return 'Analytics & Catalog Insights';
+        return 'Statistics & Analytics';
+      case '/overview':
+        return 'Overview Dashboard';
       default:
         return 'Swenetix Studio';
     }
@@ -148,8 +129,11 @@ export const Header: React.FC = () => {
 
   return (
     <HeaderContainer>
-      {/* Left: Page Title & Breadcrumb */}
+      {/* Left: Sidebar Pop Toggle & Page Title */}
       <Flex alignItems="center" gap={3}>
+        <IconButton onClick={toggleSidebar} title="Toggle Sidebar (Pop-out / Pop-in)">
+          <PanelLeft size={17} color={theme.colors.primary} />
+        </IconButton>
         <Box>
           <Text fontSize={2} fontWeight="bold" color="text">
             {getPageTitle()}
@@ -157,33 +141,31 @@ export const Header: React.FC = () => {
         </Box>
       </Flex>
 
-      {/* Center: Universal Command Search */}
+      {/* Center: Universal Search */}
       <SearchBarWrapper>
         <SearchIcon>
           <Search size={15} />
         </SearchIcon>
         <SearchInput
           type="text"
-          placeholder="Search tracks, artists, albums..."
+          placeholder="Search by title, artist, or album..."
           value={searchTerm}
           onChange={handleSearchChange}
         />
-        <KeyboardKey>Ctrl K</KeyboardKey>
       </SearchBarWrapper>
 
-      {/* Right: Theme Switcher & Actions */}
+      {/* Right: Theme Switcher & Add Song Action */}
       <Flex alignItems="center" gap={2}>
-        {/* Light / Dark Mode Switcher */}
-        <ThemeToggleButton
+        <IconButton
           onClick={toggleTheme}
-          title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Bright Light Mode'}
+          title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
         >
           {mode === 'light' ? (
             <Moon size={16} color={theme.colors.primary} />
           ) : (
             <Sun size={16} color={theme.colors.primary} />
           )}
-        </ThemeToggleButton>
+        </IconButton>
 
         <Button
           variant="primary"

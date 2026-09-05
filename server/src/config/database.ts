@@ -3,7 +3,11 @@ import { config } from './env';
 
 export const connectDB = async (): Promise<typeof mongoose> => {
   try {
-    const conn = await mongoose.connect(config.mongoUri);
+    const conn = await mongoose.connect(config.mongoUri, {
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 45000,
+      family: 4,
+    });
     console.log(`[Database] MongoDB connected: ${conn.connection.host}/${conn.connection.name}`);
     return conn;
   } catch (error) {

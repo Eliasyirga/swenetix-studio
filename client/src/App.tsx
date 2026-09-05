@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { CustomThemeProvider } from './theme/ThemeContext';
-import { AppSplashScreen } from './components/AppSplashScreen';
+import { SidebarProvider } from './context/SidebarContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { Toast } from './components/Toast';
-import { PlayerDeck } from './components/PlayerDeck';
 import { AppRoutes } from './routes/AppRoutes';
 import { useAppDispatch } from './store/store';
 import { fetchSongsRequest } from './store/songsSlice';
 import { fetchStatisticsRequest } from './store/statisticsSlice';
 
 const AppContainer = styled.div`
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
   background-color: ${(props) => props.theme.colors.background};
   color: ${(props) => props.theme.colors.text};
   display: flex;
@@ -22,22 +23,25 @@ const AppContainer = styled.div`
 
 const MainContentArea = styled.div`
   flex: 1;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow-y: auto;
   overflow-x: hidden;
+  scroll-behavior: smooth;
 `;
 
 const MainContent = styled.main`
   flex: 1;
-  max-width: 1380px;
+  max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 28px 32px 120px 32px;
+  padding: 28px 32px 48px 32px;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    padding: 20px 16px 120px 16px;
+    padding: 20px 16px 36px 16px;
   }
 `;
 
@@ -51,44 +55,38 @@ const MobileNavWrapper = styled.div`
 const AppInner: React.FC = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
-  // Initial load
+  // Load initial data
   useEffect(() => {
     dispatch(fetchSongsRequest({ page: 1, limit: 10 }));
     dispatch(fetchStatisticsRequest());
   }, [dispatch]);
 
-  const isHeroLanding = location.pathname === '/';
+  const isStartPage = location.pathname === '/';
+
+  if (isStartPage) {
+    return (
+      <>
+        <AppRoutes />
+        <Toast />
+      </>
+    );
+  }
 
   return (
-    <>
-      {!isLoaded && <AppSplashScreen onComplete={() => setIsLoaded(true)} />}
-
-      {isHeroLanding ? (
-        // 100vh Full Screen Landing Hero
-        <>
+    <AppContainer>
+      <Sidebar />
+      <MainContentArea>
+        <MobileNavWrapper>
+          <Navbar />
+        </MobileNavWrapper>
+        <Header />
+        <MainContent>
           <AppRoutes />
-          <Toast />
-        </>
-      ) : (
-        // Pro Studio App Dashboard Shell
-        <AppContainer>
-          <Sidebar />
-          <MainContentArea>
-            <MobileNavWrapper>
-              <Navbar />
-            </MobileNavWrapper>
-            <Header />
-            <MainContent>
-              <AppRoutes />
-            </MainContent>
-          </MainContentArea>
-          <PlayerDeck />
-          <Toast />
-        </AppContainer>
-      )}
-    </>
+        </MainContent>
+      </MainContentArea>
+      <Toast />
+    </AppContainer>
   );
 };
 
@@ -96,7 +94,9 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <CustomThemeProvider>
-        <AppInner />
+        <SidebarProvider>
+          <AppInner />
+        </SidebarProvider>
       </CustomThemeProvider>
     </BrowserRouter>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from '@emotion/styled';
 import {
   Plus,
@@ -47,6 +47,7 @@ const FilterBar = styled.div`
   border-radius: ${(props) => props.theme.radii.lg};
   padding: 16px 20px;
   margin-bottom: 24px;
+  box-shadow: ${(props) => props.theme.shadows.card};
 `;
 
 const SearchInputWrapper = styled.div`
@@ -57,7 +58,7 @@ const SearchInputWrapper = styled.div`
 
 const SearchIcon = styled.div`
   position: absolute;
-  left: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: ${(props) => props.theme.colors.textMuted};
@@ -66,8 +67,27 @@ const SearchIcon = styled.div`
   pointer-events: none;
 `;
 
+const GenrePill = styled.button<{ active: boolean }>`
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid ${(props) => (props.active ? props.theme.colors.primary : props.theme.colors.surfaceBorder)};
+  background: ${(props) => (props.active ? props.theme.colors.primary : props.theme.colors.surfaceLight)};
+  color: ${(props) => (props.active ? '#FFFFFF' : props.theme.colors.textSecondary)};
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => (props.active ? '#FFFFFF' : props.theme.colors.text)};
+  }
+`;
+
 export const Songs: React.FC = () => {
   const dispatch = useAppDispatch();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const {
     items: songs,
     pagination,
@@ -84,12 +104,12 @@ export const Songs: React.FC = () => {
   const [localSearch, setLocalSearch] = useState(filters.search || '');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
-  // Fetch songs whenever filters/page change
+  // Fetch songs when query parameters change
   useEffect(() => {
     dispatch(fetchSongsRequest(filters));
   }, [dispatch, filters.genre, filters.artist, filters.album, filters.page, filters.search]);
 
-  // Debounce search query
+  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localSearch !== filters.search) {
@@ -99,7 +119,6 @@ export const Songs: React.FC = () => {
     return () => clearTimeout(timer);
   }, [localSearch, filters.search, dispatch]);
 
-  // Synchronize local search state
   useEffect(() => {
     setLocalSearch(filters.search || '');
   }, [filters.search]);
@@ -134,13 +153,13 @@ export const Songs: React.FC = () => {
       >
         <Box>
           <Flex alignItems="center" gap={2}>
-            <Music size={22} />
+            <Music size={22} color="#D91C2E" />
             <Heading as="h1" fontSize={5} fontWeight="bold">
               Song Library
             </Heading>
           </Flex>
           <Text fontSize={1} color="textSecondary" mt="2px">
-            Manage and organize your music collection.
+            Total {pagination.total} songs in library
           </Text>
         </Box>
 
@@ -157,19 +176,19 @@ export const Songs: React.FC = () => {
               variant={viewMode === 'table' ? 'secondary' : 'ghost'}
               buttonSize="sm"
               onClick={() => setViewMode('table')}
-              style={{ padding: '4px 8px' }}
+              style={{ padding: '6px 10px' }}
               title="Table View"
             >
-              <TableIcon size={14} />
+              <TableIcon size={15} />
             </Button>
             <Button
               variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
               buttonSize="sm"
               onClick={() => setViewMode('cards')}
-              style={{ padding: '4px 8px' }}
+              style={{ padding: '6px 10px' }}
               title="Cards View"
             >
-              <LayoutGrid size={14} />
+              <LayoutGrid size={15} />
             </Button>
           </Flex>
 
@@ -178,13 +197,32 @@ export const Songs: React.FC = () => {
             buttonSize="md"
             onClick={() => dispatch(openCreateModal())}
           >
-            <Plus size={16} /> + Add Song
+            <Plus size={16} /> Add Song
           </Button>
         </Flex>
       </Flex>
 
       {/* Search & Filters Bar */}
       <FilterBar>
+        {/* Quick Genre Pills */}
+        <Flex gap={2} mb={3} pb={2} overflowX="auto" style={{ scrollbarWidth: 'none' }}>
+          <GenrePill
+            active={!filters.genre || filters.genre === 'All'}
+            onClick={() => dispatch(setGenreFilter('All'))}
+          >
+            All Genres
+          </GenrePill>
+          {filterOptions.genres.map((g) => (
+            <GenrePill
+              key={g}
+              active={filters.genre === g}
+              onClick={() => dispatch(setGenreFilter(g))}
+            >
+              {g}
+            </GenrePill>
+          ))}
+        </Flex>
+
         <Grid
           gridTemplateColumns={['1fr', '1fr', '2fr 1fr 1fr 1fr auto']}
           gap={2}
@@ -196,10 +234,11 @@ export const Songs: React.FC = () => {
               <Search size={15} />
             </SearchIcon>
             <Input
+              ref={searchInputRef}
               placeholder="Search by title, artist, or album..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              style={{ paddingLeft: '32px' }}
+              style={{ paddingLeft: '34px' }}
             />
           </SearchInputWrapper>
 

@@ -167,7 +167,7 @@ export const SongForm: React.FC<SongFormProps> = ({
           <Label htmlFor="song-genre">Genre *</Label>
           <Input
             id="song-genre"
-            placeholder="e.g. Synth-pop"
+            placeholder="e.g. Synth-pop, Afrobeats, Hip-Hop..."
             value={formData.genre}
             onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
             hasError={!!errors.genre}
@@ -175,6 +175,29 @@ export const SongForm: React.FC<SongFormProps> = ({
             maxLength={60}
           />
           {errors.genre && <ErrorMessage>{errors.genre}</ErrorMessage>}
+
+          {/* Quick Genre Selection Suggestions */}
+          <Flex gap={1} mt={2} flexWrap="wrap">
+            {['Pop', 'Hip-Hop', 'R&B', 'Afrobeats', 'Rock', 'Electronic', 'Jazz', 'Reggae', 'World'].map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setFormData({ ...formData, genre: g })}
+                style={{
+                  background: formData.genre.toLowerCase() === g.toLowerCase() ? '#D91C2E' : 'rgba(255, 255, 255, 0.08)',
+                  color: formData.genre.toLowerCase() === g.toLowerCase() ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '12px',
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {g}
+              </button>
+            ))}
+          </Flex>
         </FormGroup>
 
         <Flex justifyContent="flex-end" gap={2} mt={4}>

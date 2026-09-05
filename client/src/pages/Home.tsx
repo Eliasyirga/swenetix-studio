@@ -12,6 +12,7 @@ import {
   Sparkles,
   BarChart2,
   Plus,
+  TrendingUp,
 } from 'lucide-react';
 import { Box, Flex, Grid } from '../components/common/Flex';
 import { Heading, Text } from '../components/common/Text';
@@ -25,39 +26,24 @@ import { fetchSongsRequest, openCreateModal, setGenreFilter } from '../store/son
 import { AppTheme } from '../theme/theme';
 
 const HeroBanner = styled.div`
-  background: ${(props) => props.theme.colors.surface};
+  background: linear-gradient(135deg, ${(props) => props.theme.colors.surface} 0%, ${(props) => props.theme.colors.backgroundAlt} 100%);
   border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   border-radius: ${(props) => props.theme.radii.lg};
-  padding: 36px 32px;
+  padding: 32px 28px;
   margin-bottom: 28px;
   position: relative;
   overflow: hidden;
-  box-shadow: ${(props) => props.theme.shadows.sm};
+  box-shadow: ${(props) => props.theme.shadows.card};
 
   &::after {
     content: '';
     position: absolute;
     top: 0;
     right: 0;
-    width: 300px;
+    width: 320px;
     height: 100%;
-    background: radial-gradient(circle at 80% 50%, ${(props) => props.theme.colors.primaryLight}, transparent 70%);
+    background: radial-gradient(circle at 80% 50%, rgba(217, 28, 46, 0.12), transparent 70%);
     pointer-events: none;
-  }
-`;
-
-const SoundwaveBar = styled.span<{ height: number; delay: number }>`
-  width: 4px;
-  height: ${(props) => `${props.height}px`};
-  background-color: ${(props) => props.theme.colors.primary};
-  border-radius: 2px;
-  animation: pulsewave 1.2s ease-in-out infinite alternate;
-  animation-delay: ${(props) => `${props.delay}s`};
-
-  @keyframes pulsewave {
-    0% { height: 6px; }
-    50% { height: 28px; }
-    100% { height: 12px; }
   }
 `;
 
@@ -69,7 +55,13 @@ const ModuleCard = styled(Card)`
   display: flex;
   flex-direction: column;
   height: 100%;
-  box-shadow: ${(props) => props.theme.shadows.sm};
+  box-shadow: ${(props) => props.theme.shadows.card};
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${(props) => props.theme.colors.primaryBorder};
+    box-shadow: ${(props) => props.theme.shadows.md};
+  }
 `;
 
 const InteractiveRow = styled.div`
@@ -116,7 +108,7 @@ const ProgressBarContainer = styled.div`
 const ProgressBarFill = styled.div<{ percent: number }>`
   height: 100%;
   width: ${(props) => Math.min(100, Math.max(6, props.percent))}%;
-  background-color: ${(props) => props.theme.colors.primary};
+  background: linear-gradient(90deg, ${(props) => props.theme.colors.primary}, #FF4B5C);
   border-radius: 3px;
   transition: width 0.3s ease;
 `;
@@ -151,23 +143,23 @@ export const Home: React.FC = () => {
 
   return (
     <Box>
-      {/* Hero Studio Banner */}
+      {/* Overview Hero Banner */}
       <HeroBanner>
         <Flex justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={4}>
-          <Box maxWidth="680px">
+          <Box maxWidth="640px">
             <Flex alignItems="center" gap={2} mb={2}>
               <Badge variant="primary">
-                <Sparkles size={12} /> Studio Engine v2.0
+                <Sparkles size={12} /> Live Dashboard
               </Badge>
-              <Badge variant="neutral">MongoDB Aggregation Active</Badge>
+              <Badge variant="neutral">Full-Stack MERN Precision</Badge>
             </Flex>
 
             <Heading as="h1" fontSize={[5, 6]} fontWeight="bold" mb={2} color="text">
-              Your Music Catalog, Mastered.
+              Song Management Hub
             </Heading>
 
             <Text fontSize={2} color="textSecondary" mb={4} lineHeight="relaxed">
-              Explore tracks, perform real-time catalog analytics, and manage releases with strict full-stack precision.
+              Real-time catalog oversight, instant CRUD modifications, and multi-facet analytical metrics.
             </Text>
 
             <Flex gap={2} flexWrap="wrap">
@@ -176,31 +168,41 @@ export const Home: React.FC = () => {
                 buttonSize="md"
                 onClick={() => navigate('/songs')}
               >
-                <Compass size={16} /> Open Song Catalog
+                <Compass size={16} /> Explore Library
               </Button>
               <Button
                 variant="secondary"
                 buttonSize="md"
                 onClick={() => navigate('/statistics')}
               >
-                <BarChart2 size={16} /> Deep Analytics
+                <BarChart2 size={16} /> View Statistics
               </Button>
               <Button
                 variant="outline"
                 buttonSize="md"
                 onClick={() => dispatch(openCreateModal())}
               >
-                <Plus size={16} /> Add Track
+                <Plus size={16} /> Add New Song
               </Button>
             </Flex>
           </Box>
 
-          {/* Soundwave graphic */}
-          <Flex alignItems="center" gap={1} style={{ padding: '16px' }}>
-            {[10, 18, 28, 14, 22, 32, 16, 24, 12, 20, 30, 14].map((h, i) => (
-              <SoundwaveBar key={i} height={h} delay={i * 0.1} />
-            ))}
-          </Flex>
+          <Box p={3} bg="surfaceLight" borderRadius="lg" border="1px solid" borderColor="surfaceBorder">
+            <Flex flexDirection="column" gap={2}>
+              <Flex alignItems="center" gap={2}>
+                <TrendingUp size={16} color={theme.colors.primary} />
+                <Text fontSize={1} fontWeight="semibold" color="text">
+                  Catalog Status
+                </Text>
+              </Flex>
+              <Text fontSize={0} color="textSecondary">
+                {overview.totalSongs} Tracks across {overview.totalGenres} Genres
+              </Text>
+              <Text fontSize={0} color="textMuted">
+                {overview.totalArtists} Artists &middot; {overview.totalAlbums} Albums
+              </Text>
+            </Flex>
+          </Box>
         </Flex>
       </HeroBanner>
 
@@ -213,14 +215,14 @@ export const Home: React.FC = () => {
         <StatCard
           title="Catalog Tracks"
           value={overview.totalSongs}
-          subtitle="Total songs in library"
+          subtitle="Total songs in database"
           icon={<Music size={20} />}
           onClick={() => navigate('/songs')}
         />
         <StatCard
-          title="Unique Artists"
+          title="Featured Artists"
           value={overview.totalArtists}
-          subtitle="Featured performers"
+          subtitle="Distinct musicians"
           icon={<Mic size={20} />}
           onClick={() => navigate('/statistics')}
         />
@@ -234,19 +236,19 @@ export const Home: React.FC = () => {
         <StatCard
           title="Active Genres"
           value={overview.totalGenres}
-          subtitle="Musical genres"
+          subtitle="Music categories"
           icon={<Radio size={20} />}
           onClick={() => navigate('/statistics')}
         />
       </Grid>
 
-      {/* 3 Core Studio Modules */}
+      {/* 3 Core Dashboard Widgets */}
       <Grid
         gridTemplateColumns={['1fr', '1fr', 'repeat(3, 1fr)']}
         gap={3}
         mb={4}
       >
-        {/* Module 1: Top Performing Artists */}
+        {/* Module 1: Top Artists */}
         <ModuleCard>
           <Flex justifyContent="space-between" alignItems="center" mb={3}>
             <Flex alignItems="center" gap={2}>
@@ -261,7 +263,7 @@ export const Home: React.FC = () => {
               onClick={() => navigate('/statistics')}
               style={{ padding: '2px 8px', fontSize: '12px' }}
             >
-              All <ArrowRight size={12} />
+              View All <ArrowRight size={12} />
             </Button>
           </Flex>
 
@@ -285,14 +287,14 @@ export const Home: React.FC = () => {
                       </Text>
                     </Box>
                   </Flex>
-                  <Badge variant="primary">{artist.totalSongs} tracks</Badge>
+                  <Badge variant="primary">{artist.totalSongs} songs</Badge>
                 </InteractiveRow>
               ))}
             </Flex>
           )}
         </ModuleCard>
 
-        {/* Module 2: Genre Spectrum Breakdown */}
+        {/* Module 2: Genre Breakdown */}
         <ModuleCard>
           <Flex justifyContent="space-between" alignItems="center" mb={3}>
             <Flex alignItems="center" gap={2}>
@@ -326,7 +328,7 @@ export const Home: React.FC = () => {
                         {genre.genre}
                       </Text>
                       <Text fontSize={0} color="textSecondary" style={{ fontFamily: 'monospace' }}>
-                        {genre.count} songs ({genre.percentage || 0}%)
+                        {genre.count} ({genre.percentage || 0}%)
                       </Text>
                     </Flex>
                     <ProgressBarContainer>
@@ -354,7 +356,7 @@ export const Home: React.FC = () => {
               onClick={() => navigate('/statistics')}
               style={{ padding: '2px 8px', fontSize: '12px' }}
             >
-              All <ArrowRight size={12} />
+              View All <ArrowRight size={12} />
             </Button>
           </Flex>
 
@@ -378,7 +380,7 @@ export const Home: React.FC = () => {
                       </Text>
                     </Box>
                   </Flex>
-                  <Badge variant="secondary">{album.totalSongs} tracks</Badge>
+                  <Badge variant="secondary">{album.totalSongs} songs</Badge>
                 </InteractiveRow>
               ))}
             </Flex>

@@ -63,6 +63,5 @@ const songSchema = new Schema<ISongDocument>(
 // Indexes for text search and rapid filter lookups
 songSchema.index({ title: 'text', artist: 'text', album: 'text', genre: 'text' });
 songSchema.index({ artist: 1, album: 1 });
-songSchema.index({ genre: 1 });
 
 export const Song: Model<ISongDocument> = mongoose.model<ISongDocument>('Song', songSchema);

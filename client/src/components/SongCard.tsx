@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Edit2, Trash2, Disc3, Clock } from 'lucide-react';
+import { Edit2, Trash2, Disc } from 'lucide-react';
 import { Song } from '../types/song';
 import { Card } from './Card';
 import { Badge } from './Badge';
@@ -19,13 +19,13 @@ const CardContainer = styled(Card)`
   &:hover {
     transform: translateY(-3px);
     border-color: ${(props) => props.theme.colors.primary};
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: ${(props) => props.theme.shadows.md};
   }
 `;
 
 const CoverArtwork = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: ${(props) => props.theme.radii.md};
   background-color: ${(props) => props.theme.colors.primaryLight};
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
@@ -47,20 +47,24 @@ export const SongCard: React.FC<SongCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const formattedDuration = song.duration
-    ? `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}`
-    : '3:30';
-
   return (
     <CardContainer>
       <Box>
         <Flex alignItems="flex-start" gap={3} mb={3}>
           <CoverArtwork>
-            <Disc3 size={24} />
+            <Disc size={22} />
           </CoverArtwork>
 
           <Box flex={1} overflow="hidden">
-            <Heading as="h4" fontSize={2} fontWeight="bold" truncate title={song.title} color="text" mb={1}>
+            <Heading
+              as="h4"
+              fontSize={2}
+              fontWeight="bold"
+              truncate
+              title={song.title}
+              color="text"
+              mb={1}
+            >
               {song.title}
             </Heading>
             <Text fontSize={1} color="textSecondary" truncate>
@@ -70,15 +74,9 @@ export const SongCard: React.FC<SongCardProps> = ({
         </Flex>
 
         <Flex justifyContent="space-between" alignItems="center" mb={3}>
-          <Text fontSize={0} color="textMuted" truncate style={{ maxWidth: '140px' }} title={song.album}>
-            {song.album}
+          <Text fontSize={0} color="textMuted" truncate style={{ maxWidth: '180px' }} title={song.album}>
+            Album: {song.album}
           </Text>
-          <Flex alignItems="center" gap={1}>
-            <Clock size={11} />
-            <Text fontSize={0} color="textMuted" style={{ fontFamily: 'monospace' }}>
-              {formattedDuration}
-            </Text>
-          </Flex>
         </Flex>
       </Box>
 
@@ -96,19 +94,19 @@ export const SongCard: React.FC<SongCardProps> = ({
             variant="ghost"
             buttonSize="sm"
             onClick={() => onEdit(song)}
-            title="Edit Track"
-            style={{ padding: '5px 8px', borderRadius: '6px' }}
+            title="Edit Song"
+            style={{ padding: '6px 8px', borderRadius: '6px' }}
           >
-            <Edit2 size={13} />
+            <Edit2 size={14} />
           </Button>
           <Button
             variant="ghost"
             buttonSize="sm"
             onClick={() => onDelete(song)}
-            title="Delete Track"
-            style={{ padding: '5px 8px', borderRadius: '6px' }}
+            title="Delete Song"
+            style={{ padding: '6px 8px', borderRadius: '6px' }}
           >
-            <Trash2 size={13} />
+            <Trash2 size={14} />
           </Button>
         </Flex>
       </Flex>

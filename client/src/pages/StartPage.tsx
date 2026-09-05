@@ -390,7 +390,7 @@ const HeroRight = styled.div`
   width: 100%;
 `;
 
-const RealisticHeadphonesShowcase = styled.div<{ isPlaying: boolean }>`
+const RealisticHeadphonesShowcase = styled.div`
   position: relative;
   width: 100%;
   max-width: 440px;
@@ -495,8 +495,8 @@ export const StartPage: React.FC = () => {
   const { pagination } = useAppSelector((state) => state.songs);
   const { data: stats } = useAppSelector((state) => state.statistics);
 
-  const totalSongs = pagination.total || stats?.overview.totalSongs || 28;
-  const totalGenres = stats?.overview.totalGenres || stats?.songsByGenre?.length || 12;
+  const totalSongs = pagination.total || stats?.overview.totalSongs || 59;
+  const totalGenres = stats?.overview.totalGenres || stats?.songsByGenre?.length || 9;
 
   // Real-time Canvas Animated Soundwave Equalizer Matrix Background
   useEffect(() => {
@@ -563,7 +563,6 @@ export const StartPage: React.FC = () => {
                 ctx.shadowBlur = 0;
               }
             } else {
-              // High contrast crimson matrix on light daylight background
               if (normalizedDist > 0.65) {
                 ctx.fillStyle = `rgba(217, 28, 46, ${alpha * 0.9})`;
                 ctx.shadowColor = 'rgba(217, 28, 46, 0.3)';
@@ -589,7 +588,7 @@ export const StartPage: React.FC = () => {
     };
   }, [isPlaying, isDark]);
 
-  // Process and render the photorealistic headset with 100% transparent background
+  // Process and render the photorealistic headset with transparent background
   useEffect(() => {
     const canvas = headsetCanvasRef.current;
     if (!canvas) return;
@@ -610,7 +609,7 @@ export const StartPage: React.FC = () => {
       const frame = ctx.getImageData(0, 0, size, size);
       const d = frame.data;
 
-      // Mathematical alpha extraction to eliminate solid black background completely
+      // Mathematical alpha extraction to eliminate solid background
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i];
         const g = d[i + 1];
@@ -646,7 +645,7 @@ export const StartPage: React.FC = () => {
         <NavBrandGroup>
           <BrandBadge onClick={() => navigate('/')}>
             <Music2 size={16} />
-            <span>Swenetix</span>
+            <span>Swenetix Studio</span>
           </BrandBadge>
 
           <form onSubmit={handleSearchSubmit}>
@@ -664,10 +663,9 @@ export const StartPage: React.FC = () => {
         </NavBrandGroup>
 
         <NavLinksList>
-          <NavLinkItem onClick={() => navigate('/')}>Home</NavLinkItem>
-          <NavLinkItem onClick={() => navigate('/songs')}>Audio</NavLinkItem>
+          <NavLinkItem onClick={() => navigate('/songs')}>Songs</NavLinkItem>
           <NavLinkItem onClick={() => navigate('/overview')}>Overview</NavLinkItem>
-          <NavLinkItem onClick={() => navigate('/statistics')}>Analytics</NavLinkItem>
+          <NavLinkItem onClick={() => navigate('/statistics')}>Statistics</NavLinkItem>
           <NavLinkItem onClick={() => dispatch(openCreateModal())}>Add Song</NavLinkItem>
 
           <AvatarToggle
@@ -705,7 +703,7 @@ export const StartPage: React.FC = () => {
           {/* 3-Column Metrics Row */}
           <StatsStrip>
             <StatItem>
-              <StatNumber>{totalSongs >= 1000 ? `${(totalSongs / 1000).toFixed(0)}k+` : `${totalSongs}+`}</StatNumber>
+              <StatNumber>{totalSongs}+</StatNumber>
               <StatLabel>Over {totalSongs} sound files</StatLabel>
             </StatItem>
 
@@ -727,7 +725,7 @@ export const StartPage: React.FC = () => {
 
         {/* Right Hero: Isolated Transparent Studio Headphones & Interactive Audio Deck */}
         <HeroRight>
-          <RealisticHeadphonesShowcase isPlaying={isPlaying}>
+          <RealisticHeadphonesShowcase>
             <HeadsetCanvas ref={headsetCanvasRef} />
           </RealisticHeadphonesShowcase>
 
@@ -740,7 +738,7 @@ export const StartPage: React.FC = () => {
             <Box style={{ flex: 1 }}>
               <Flex alignItems="center" justifyContent="space-between" mb={1}>
                 <span style={{ fontSize: '13px', fontWeight: 700, color: 'inherit' }}>
-                  {isPlaying ? 'Tizita Acoustic — 96kHz Master' : 'Live Synth & Equalizer Stream'}
+                  {isPlaying ? 'Live Acoustic Equalizer Stream' : 'Live Equalizer Stream'}
                 </span>
                 <span style={{ fontSize: '11px', color: '#D91C2E', fontFamily: 'monospace', fontWeight: 600 }}>
                   {isPlaying ? 'ACTIVE' : 'STANDBY'}
@@ -763,7 +761,7 @@ export const StartPage: React.FC = () => {
           <Flex alignItems="center" gap={2}>
             <Database size={13} color="#D91C2E" />
             <span style={{ fontSize: '12px', color: isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.55)' }}>
-              Live Animated Equalizer Engine &middot; MongoDB 7.0 &middot; Redux-Saga
+              Live Animated Equalizer Engine &middot; Redux-Saga &middot; Emotion
             </span>
           </Flex>
           <span style={{ fontSize: '12px', color: isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.55)' }}>

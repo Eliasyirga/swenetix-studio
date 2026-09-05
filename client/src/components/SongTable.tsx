@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Edit2, Trash2, Disc, Clock } from 'lucide-react';
+import { Edit2, Trash2, Disc } from 'lucide-react';
 import { Song } from '../types/song';
 import { Badge } from './Badge';
 import { Button } from './Button';
@@ -13,6 +13,7 @@ const TableWrapper = styled.div`
   background: ${(props) => props.theme.colors.surface};
   border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   border-radius: ${(props) => props.theme.radii.lg};
+  box-shadow: ${(props) => props.theme.shadows.card};
 `;
 
 const StyledTable = styled.table`
@@ -22,7 +23,7 @@ const StyledTable = styled.table`
 `;
 
 const Th = styled.th`
-  padding: 14px 16px;
+  padding: 14px 18px;
   background: ${(props) => props.theme.colors.surfaceLight};
   color: ${(props) => props.theme.colors.textSecondary};
   font-family: ${(props) => props.theme.fonts.heading};
@@ -34,7 +35,7 @@ const Th = styled.th`
 `;
 
 const Td = styled.td`
-  padding: 14px 16px;
+  padding: 14px 18px;
   border-bottom: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   color: ${(props) => props.theme.colors.text};
   font-size: 14px;
@@ -42,18 +43,20 @@ const Td = styled.td`
 
 const Tr = styled.tr`
   transition: all 0.15s ease;
+
   &:hover {
     background: ${(props) => props.theme.colors.surfaceHover};
   }
+
   &:last-child ${Td} {
     border-bottom: none;
   }
 `;
 
 const TrackIconBox = styled(Box)`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background-color: ${(props) => props.theme.colors.primaryLight};
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
   color: ${(props) => props.theme.colors.primary};
@@ -80,81 +83,67 @@ export const SongTable: React.FC<SongTableProps> = ({
         <thead>
           <tr>
             <Th style={{ width: '48px' }}>#</Th>
-            <Th>Track / Title</Th>
+            <Th>Title</Th>
             <Th>Artist</Th>
             <Th>Album</Th>
             <Th>Genre</Th>
-            <Th style={{ width: '90px' }}>
-              <Flex alignItems="center" gap={1}>
-                <Clock size={13} /> Time
-              </Flex>
-            </Th>
             <Th style={{ textAlign: 'right', width: '110px' }}>Actions</Th>
           </tr>
         </thead>
         <tbody>
-          {songs.map((song, index) => {
-            const formattedDuration = song.duration
-              ? `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}`
-              : '3:30';
-
-            return (
-              <Tr key={song.id}>
-                <Td style={{ color: 'inherit', opacity: 0.6, fontFamily: 'monospace' }}>
-                  {(index + 1).toString().padStart(2, '0')}
-                </Td>
-                <Td>
-                  <Flex alignItems="center" gap={2}>
-                    <TrackIconBox>
-                      <Disc size={16} />
-                    </TrackIconBox>
-                    <Box>
-                      <Text fontWeight="semibold" color="text">
-                        {song.title}
-                      </Text>
-                      <Text fontSize={0} color="textSecondary">
-                        Added {new Date(song.createdAt).toLocaleDateString()}
-                      </Text>
-                    </Box>
-                  </Flex>
-                </Td>
-                <Td>
-                  <Text color="text" fontWeight="medium">{song.artist}</Text>
-                </Td>
-                <Td>
-                  <Text color="textSecondary">{song.album}</Text>
-                </Td>
-                <Td>
-                  <Badge variant="primary">{song.genre}</Badge>
-                </Td>
-                <Td style={{ fontFamily: 'monospace', opacity: 0.75, fontSize: '13px' }}>
-                  {formattedDuration}
-                </Td>
-                <Td style={{ textAlign: 'right' }}>
-                  <Flex justifyContent="flex-end" alignItems="center" gap={1}>
-                    <Button
-                      variant="ghost"
-                      buttonSize="sm"
-                      onClick={() => onEdit(song)}
-                      title="Edit Track"
-                      style={{ padding: '6px 8px', borderRadius: '6px' }}
-                    >
-                      <Edit2 size={15} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      buttonSize="sm"
-                      onClick={() => onDelete(song)}
-                      title="Delete Track"
-                      style={{ padding: '6px 8px', borderRadius: '6px' }}
-                    >
-                      <Trash2 size={15} />
-                    </Button>
-                  </Flex>
-                </Td>
-              </Tr>
-            );
-          })}
+          {songs.map((song, index) => (
+            <Tr key={song.id}>
+              <Td style={{ color: 'inherit', opacity: 0.6, fontFamily: 'monospace', fontSize: '13px' }}>
+                {(index + 1).toString().padStart(2, '0')}
+              </Td>
+              <Td>
+                <Flex alignItems="center" gap={3}>
+                  <TrackIconBox>
+                    <Disc size={18} />
+                  </TrackIconBox>
+                  <Box>
+                    <Text fontWeight="semibold" color="text">
+                      {song.title}
+                    </Text>
+                    <Text fontSize={0} color="textMuted">
+                      Added {new Date(song.createdAt).toLocaleDateString()}
+                    </Text>
+                  </Box>
+                </Flex>
+              </Td>
+              <Td>
+                <Text color="text" fontWeight="medium">{song.artist}</Text>
+              </Td>
+              <Td>
+                <Text color="textSecondary">{song.album}</Text>
+              </Td>
+              <Td>
+                <Badge variant="primary">{song.genre}</Badge>
+              </Td>
+              <Td style={{ textAlign: 'right' }}>
+                <Flex justifyContent="flex-end" alignItems="center" gap={1}>
+                  <Button
+                    variant="ghost"
+                    buttonSize="sm"
+                    onClick={() => onEdit(song)}
+                    title="Edit Song"
+                    style={{ padding: '6px 8px', borderRadius: '6px' }}
+                  >
+                    <Edit2 size={15} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    buttonSize="sm"
+                    onClick={() => onDelete(song)}
+                    title="Delete Song"
+                    style={{ padding: '6px 8px', borderRadius: '6px' }}
+                  >
+                    <Trash2 size={15} />
+                  </Button>
+                </Flex>
+              </Td>
+            </Tr>
+          ))}
         </tbody>
       </StyledTable>
     </TableWrapper>
