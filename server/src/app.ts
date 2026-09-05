@@ -37,6 +37,25 @@ export const createApp = (): Application => {
     );
   });
 
+  // Welcome / Root Endpoint
+  app.get(['/', '/api'], (_req: Request, res: Response) => {
+    ApiResponse.success(
+      res,
+      {
+        name: 'Swenetix Studio API',
+        version: '1.0.0',
+        documentation: 'https://github.com/Eliasyirga/swenetix-studio/blob/main/docs/API_DOCUMENTATION.md',
+        endpoints: {
+          health: '/api/health',
+          songs: '/api/songs',
+          statistics: '/api/statistics',
+          seed: 'POST /api/songs/seed',
+        },
+      },
+      'Welcome to Swenetix Studio REST API'
+    );
+  });
+
   // REST API Routes
   app.use('/api/songs', songRoutes);
   app.use('/api/statistics', statisticsRoutes);
