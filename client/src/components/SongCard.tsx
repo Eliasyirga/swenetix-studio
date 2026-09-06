@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Edit2, Trash2, Disc } from 'lucide-react';
+import { Edit2, Trash2, Disc, Heart } from 'lucide-react';
 import { Song } from '../types/song';
 import { Card } from './Card';
 import { Badge } from './Badge';
@@ -36,41 +36,76 @@ const CoverArtwork = styled.div`
   flex-shrink: 0;
 `;
 
+const HeartButton = styled.button<{ isFavorite?: boolean }>`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${(props) => (props.isFavorite ? '#FF4B5C' : props.theme.colors.textMuted)};
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: #FF4B5C;
+    transform: scale(1.2);
+    background: rgba(255, 75, 92, 0.1);
+  }
+`;
+
 export interface SongCardProps {
   song: Song;
   onEdit: (song: Song) => void;
   onDelete: (song: Song) => void;
+  onToggleFavorite?: (song: Song) => void;
 }
 
 export const SongCard: React.FC<SongCardProps> = ({
   song,
   onEdit,
   onDelete,
+  onToggleFavorite,
 }) => {
   return (
     <CardContainer>
       <Box>
-        <Flex alignItems="flex-start" gap={3} mb={3}>
-          <CoverArtwork>
-            <Disc size={22} />
-          </CoverArtwork>
+        <Flex alignItems="flex-start" justifyContent="space-between" gap={2} mb={3}>
+          <Flex alignItems="flex-start" gap={3} overflow="hidden" flex={1}>
+            <CoverArtwork>
+              <Disc size={22} />
+            </CoverArtwork>
 
-          <Box flex={1} overflow="hidden">
-            <Heading
-              as="h4"
-              fontSize={2}
-              fontWeight="bold"
-              truncate
-              title={song.title}
-              color="text"
-              mb={1}
-            >
-              {song.title}
-            </Heading>
-            <Text fontSize={1} color="textSecondary" truncate>
-              {song.artist}
-            </Text>
-          </Box>
+            <Box flex={1} overflow="hidden">
+              <Heading
+                as="h4"
+                fontSize={2}
+                fontWeight="bold"
+                truncate
+                title={song.title}
+                color="text"
+                mb={1}
+              >
+                {song.title}
+              </Heading>
+              <Text fontSize={1} color="textSecondary" truncate>
+                {song.artist}
+              </Text>
+            </Box>
+          </Flex>
+
+          <HeartButton
+            isFavorite={song.isFavorite}
+            onClick={() => onToggleFavorite?.(song)}
+            title={song.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-label="Toggle favorite"
+          >
+            <Heart
+              size={17}
+              fill={song.isFavorite ? '#FF4B5C' : 'transparent'}
+            />
+          </HeartButton>
         </Flex>
 
         <Flex justifyContent="space-between" alignItems="center" mb={3}>

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Edit2, Trash2, Disc } from 'lucide-react';
+import { Edit2, Trash2, Disc, Heart } from 'lucide-react';
 import { Song } from '../types/song';
 import { Badge } from './Badge';
 import { Button } from './Button';
@@ -19,11 +19,10 @@ const TableWrapper = styled.div`
 
 const StyledTable = styled.table`
   width: 100%;
-  min-width: 580px;
+  min-width: 620px;
   border-collapse: collapse;
   text-align: left;
 `;
-
 
 const Th = styled.th`
   padding: 14px 18px;
@@ -69,23 +68,45 @@ const TrackIconBox = styled(Box)`
   flex-shrink: 0;
 `;
 
+const HeartButton = styled.button<{ isFavorite?: boolean }>`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${(props) => (props.isFavorite ? '#FF4B5C' : props.theme.colors.textMuted)};
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: #FF4B5C;
+    transform: scale(1.2);
+    background: rgba(255, 75, 92, 0.1);
+  }
+`;
+
 export interface SongTableProps {
   songs: Song[];
   onEdit: (song: Song) => void;
   onDelete: (song: Song) => void;
+  onToggleFavorite?: (song: Song) => void;
 }
 
 export const SongTable: React.FC<SongTableProps> = ({
   songs,
   onEdit,
   onDelete,
+  onToggleFavorite,
 }) => {
   return (
     <TableWrapper>
       <StyledTable>
         <thead>
           <tr>
-            <Th style={{ width: '48px' }}>#</Th>
+            <Th style={{ width: '40px' }}>#</Th>
+            <Th style={{ width: '40px' }}>Fav</Th>
             <Th>Title</Th>
             <Th>Artist</Th>
             <Th>Album</Th>
@@ -98,6 +119,19 @@ export const SongTable: React.FC<SongTableProps> = ({
             <Tr key={song.id}>
               <Td style={{ color: 'inherit', opacity: 0.6, fontFamily: 'monospace', fontSize: '13px' }}>
                 {(index + 1).toString().padStart(2, '0')}
+              </Td>
+              <Td style={{ padding: '14px 8px' }}>
+                <HeartButton
+                  isFavorite={song.isFavorite}
+                  onClick={() => onToggleFavorite?.(song)}
+                  title={song.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-label="Toggle favorite"
+                >
+                  <Heart
+                    size={16}
+                    fill={song.isFavorite ? '#FF4B5C' : 'transparent'}
+                  />
+                </HeartButton>
               </Td>
               <Td>
                 <Flex alignItems="center" gap={3}>

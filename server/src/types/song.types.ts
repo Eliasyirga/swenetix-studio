@@ -4,6 +4,7 @@ export interface ISong {
   album: string;
   genre: string;
   duration?: number;
+  isFavorite?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -13,6 +14,7 @@ export interface SongQueryFilters {
   genre?: string;
   artist?: string;
   album?: string;
+  favorite?: boolean;
   page?: number;
   limit?: number;
 }

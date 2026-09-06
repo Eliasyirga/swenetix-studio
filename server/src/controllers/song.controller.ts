@@ -85,13 +85,21 @@ export class SongController {
    */
   static async getSongs(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { search, genre, artist, album, page, limit } = req.query;
+      const { search, genre, artist, album, favorite, page, limit } = req.query;
+
+      const isFav =
+        favorite === 'true' || favorite === '1'
+          ? true
+          : favorite === 'false' || favorite === '0'
+          ? false
+          : undefined;
 
       const result = await SongService.getSongs({
         search: typeof search === 'string' ? search : undefined,
         genre: typeof genre === 'string' ? genre : undefined,
         artist: typeof artist === 'string' ? artist : undefined,
         album: typeof album === 'string' ? album : undefined,
+        favorite: isFav,
         page: page ? parseInt(page as string, 10) : 1,
         limit: limit ? parseInt(limit as string, 10) : 10,
       });
@@ -147,6 +155,29 @@ export class SongController {
       }
 
       ApiResponse.success(res, song, 'Song updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PATCH /api/songs/:id/favorite
+   */
+  static async toggleFavorite(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const song = await SongService.toggleFavorite(id);
+
+      if (!song) {
+        ApiResponse.error(res, `Song not found with ID ${id}`, 404);
+        return;
+      }
+
+      ApiResponse.success(
+        res,
+        song,
+        song.isFavorite ? 'Added to favorites' : 'Removed from favorites'
+      );
     } catch (error) {
       next(error);
     }

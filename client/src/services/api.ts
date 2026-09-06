@@ -30,6 +30,7 @@ export const api = {
     if (filters.genre && filters.genre !== 'All') params.genre = filters.genre;
     if (filters.artist && filters.artist !== 'All') params.artist = filters.artist;
     if (filters.album && filters.album !== 'All') params.album = filters.album;
+    if (filters.favorite !== undefined) params.favorite = filters.favorite ? 'true' : 'false';
     if (filters.page) params.page = filters.page;
     if (filters.limit) params.limit = filters.limit;
 
@@ -49,6 +50,11 @@ export const api = {
 
   updateSong: async ({ id, data }: UpdateSongDto): Promise<Song> => {
     const response = await apiClient.put<ApiResponse<Song>>(`/songs/${id}`, data);
+    return response.data.data;
+  },
+
+  toggleFavorite: async (id: string): Promise<Song> => {
+    const response = await apiClient.patch<ApiResponse<Song>>(`/songs/${id}/favorite`);
     return response.data.data;
   },
 

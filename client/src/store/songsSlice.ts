@@ -101,6 +101,10 @@ const songsSlice = createSlice({
       state.filters.album = action.payload;
       state.filters.page = 1;
     },
+    setFavoriteFilter: (state, action: PayloadAction<boolean | undefined>) => {
+      state.filters.favorite = action.payload;
+      state.filters.page = 1;
+    },
     setPage: (state, action: PayloadAction<number>) => {
       state.filters.page = action.payload;
     },
@@ -110,9 +114,33 @@ const songsSlice = createSlice({
         genre: 'All',
         artist: 'All',
         album: 'All',
+        favorite: undefined,
         page: 1,
         limit: 10,
       };
+    },
+
+    // Toggle Favorite
+    toggleFavoriteRequest: (state, action: PayloadAction<string>) => {
+      // Optimistic update
+      const index = state.items.findIndex((s) => s.id === action.payload);
+      if (index !== -1) {
+        state.items[index].isFavorite = !state.items[index].isFavorite;
+      }
+    },
+    toggleFavoriteSuccess: (state, action: PayloadAction<Song>) => {
+      const index = state.items.findIndex((s) => s.id === action.payload.id);
+      if (index !== -1) {
+        state.items[index] = action.payload;
+      }
+    },
+    toggleFavoriteFailure: (state, action: PayloadAction<{ id: string; error: string }>) => {
+      // Revert optimistic update on error
+      const index = state.items.findIndex((s) => s.id === action.payload.id);
+      if (index !== -1) {
+        state.items[index].isFavorite = !state.items[index].isFavorite;
+      }
+      state.error = action.payload.error;
     },
 
     // Create Song
@@ -225,8 +253,12 @@ export const {
   setGenreFilter,
   setArtistFilter,
   setAlbumFilter,
+  setFavoriteFilter,
   setPage,
   resetFilters,
+  toggleFavoriteRequest,
+  toggleFavoriteSuccess,
+  toggleFavoriteFailure,
   createSongRequest,
   createSongSuccess,
   createSongFailure,

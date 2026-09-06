@@ -45,6 +45,11 @@ const songSchema = new Schema<ISongDocument>(
       min: [1, 'Duration must be at least 1 second'],
       max: [7200, 'Duration cannot exceed 2 hours'],
     },
+    isFavorite: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,

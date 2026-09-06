@@ -1,5 +1,12 @@
 import { Song } from '../models/song.model';
-import { StatisticsData } from '../types/statistics.types';
+import { StatisticsData, DurationMetrics } from '../types/statistics.types';
+
+function formatDuration(seconds: number): string {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
 export class StatisticsService {
   /**
@@ -9,7 +16,7 @@ export class StatisticsService {
     const pipelineResult = await Song.aggregate([
       {
         $facet: {
-          // 1. Overall counts: Total songs, unique artists, unique albums, unique genres
+          // 1. Overall counts: Total songs, unique artists, unique albums, unique genres, favorites
           overview: [
             {
               $group: {
@@ -18,6 +25,11 @@ export class StatisticsService {
                 uniqueArtists: { $addToSet: '$artist' },
                 uniqueAlbums: { $addToSet: '$album' },
                 uniqueGenres: { $addToSet: '$genre' },
+                totalFavorites: {
+                  $sum: { $cond: [{ $eq: ['$isFavorite', true] }, 1, 0] },
+                },
+                totalDurationSeconds: { $sum: { $ifNull: ['$duration', 210] } },
+                avgDurationSeconds: { $avg: { $ifNull: ['$duration', 210] } },
               },
             },
             {
@@ -27,6 +39,9 @@ export class StatisticsService {
                 totalArtists: { $size: '$uniqueArtists' },
                 totalAlbums: { $size: '$uniqueAlbums' },
                 totalGenres: { $size: '$uniqueGenres' },
+                totalFavorites: 1,
+                totalDurationSeconds: 1,
+                avgDurationSeconds: 1,
               },
             },
           ],
@@ -37,6 +52,9 @@ export class StatisticsService {
               $group: {
                 _id: '$genre',
                 count: { $sum: 1 },
+                favoriteCount: {
+                  $sum: { $cond: [{ $eq: ['$isFavorite', true] }, 1, 0] },
+                },
               },
             },
             { $sort: { count: -1, _id: 1 } },
@@ -45,6 +63,7 @@ export class StatisticsService {
                 _id: 0,
                 genre: '$_id',
                 count: 1,
+                favoriteCount: 1,
               },
             },
           ],
@@ -87,17 +106,63 @@ export class StatisticsService {
             },
             { $sort: { totalSongs: -1, album: 1 } },
           ],
+
+          // 5. Longest track
+          longestTrack: [
+            { $match: { duration: { $gt: 0 } } },
+            { $sort: { duration: -1 } },
+            { $limit: 1 },
+            {
+              $project: {
+                _id: 0,
+                title: 1,
+                artist: 1,
+                duration: 1,
+              },
+            },
+          ],
+
+          // 6. Shortest track
+          shortestTrack: [
+            { $match: { duration: { $gt: 0 } } },
+            { $sort: { duration: 1 } },
+            { $limit: 1 },
+            {
+              $project: {
+                _id: 0,
+                title: 1,
+                artist: 1,
+                duration: 1,
+              },
+            },
+          ],
         },
       },
     ]);
 
     const result = pipelineResult[0] || {};
 
-    const overview = result.overview?.[0] || {
+    const rawOverview = result.overview?.[0] || {
       totalSongs: 0,
       totalArtists: 0,
       totalAlbums: 0,
       totalGenres: 0,
+      totalFavorites: 0,
+      totalDurationSeconds: 0,
+      avgDurationSeconds: 0,
+    };
+
+    const totalSongs = rawOverview.totalSongs || 0;
+    const totalFavorites = rawOverview.totalFavorites || 0;
+    const favoritePercentage = totalSongs > 0 ? Math.round((totalFavorites / totalSongs) * 100) : 0;
+
+    const overview = {
+      totalSongs,
+      totalArtists: rawOverview.totalArtists || 0,
+      totalAlbums: rawOverview.totalAlbums || 0,
+      totalGenres: rawOverview.totalGenres || 0,
+      totalFavorites,
+      favoritePercentage,
     };
 
     const songsByGenre = result.songsByGenre || [];
@@ -105,14 +170,42 @@ export class StatisticsService {
     const albums = result.albums || [];
 
     // Calculate percentage for genres
-    const totalSongs = overview.totalSongs;
     const formattedGenres = songsByGenre.map((g: { genre: string; count: number }) => ({
       genre: g.genre,
       count: g.count,
       percentage: totalSongs > 0 ? Math.round((g.count / totalSongs) * 100) : 0,
     }));
 
-    // Calculate curated highlights
+    // Duration Metrics
+    const avgDuration = Math.round(rawOverview.avgDurationSeconds || 0);
+    const totalHours = Number(((rawOverview.totalDurationSeconds || 0) / 3600).toFixed(1));
+
+    const longest = result.longestTrack?.[0] || null;
+    const shortest = result.shortestTrack?.[0] || null;
+
+    const durationMetrics: DurationMetrics = {
+      averageDuration: avgDuration,
+      formattedAverage: formatDuration(avgDuration),
+      totalCatalogHours: totalHours,
+      longestSong: longest
+        ? {
+            title: longest.title,
+            artist: longest.artist,
+            duration: longest.duration,
+            formatted: formatDuration(longest.duration),
+          }
+        : null,
+      shortestSong: shortest
+        ? {
+            title: shortest.title,
+            artist: shortest.artist,
+            duration: shortest.duration,
+            formatted: formatDuration(shortest.duration),
+          }
+        : null,
+    };
+
+    // Curated highlights
     const mostProlificArtist =
       artists.length > 0
         ? { artist: artists[0].artist, songCount: artists[0].totalSongs }
@@ -128,16 +221,26 @@ export class StatisticsService {
         ? { album: albums[0].album, artist: albums[0].artist, songCount: albums[0].totalSongs }
         : null;
 
+    // Find genre with highest favoriteCount
+    const genresWithFavs = [...songsByGenre].sort((a, b) => (b.favoriteCount || 0) - (a.favoriteCount || 0));
+    const mostFavoritedGenre =
+      genresWithFavs.length > 0 && genresWithFavs[0].favoriteCount > 0
+        ? { genre: genresWithFavs[0].genre, count: genresWithFavs[0].favoriteCount }
+        : null;
+
     return {
       overview,
       songsByGenre: formattedGenres,
       artists,
       albums,
+      durationMetrics,
       highlights: {
         mostProlificArtist,
         mostCommonGenre,
         largestAlbum,
+        mostFavoritedGenre,
       },
     };
   }
 }
+

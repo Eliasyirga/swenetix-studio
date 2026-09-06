@@ -6,7 +6,7 @@ export class SongService {
    * List songs with flexible search, multi-attribute filtering, and pagination
    */
   static async getSongs(filters: SongQueryFilters = {}): Promise<PaginatedSongsResponse> {
-    const { search, genre, artist, album, page = 1, limit = 10 } = filters;
+    const { search, genre, artist, album, favorite, page = 1, limit = 10 } = filters;
 
     const query: Record<string, unknown> = {};
 
@@ -32,6 +32,10 @@ export class SongService {
 
     if (album && album.trim() !== '' && album.toLowerCase() !== 'all') {
       query.album = { $regex: new RegExp(`^${album.trim()}$`, 'i') };
+    }
+
+    if (favorite !== undefined && favorite !== null) {
+      query.isFavorite = favorite;
     }
 
     const currentPage = Math.max(1, Number(page));
@@ -88,6 +92,16 @@ export class SongService {
       new: true,
       runValidators: true,
     });
+  }
+
+  /**
+   * Toggle song favorite status
+   */
+  static async toggleFavorite(id: string): Promise<ISongDocument | null> {
+    const song = await Song.findById(id);
+    if (!song) return null;
+    song.isFavorite = !song.isFavorite;
+    return song.save();
   }
 
   /**

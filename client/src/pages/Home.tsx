@@ -13,6 +13,8 @@ import {
   BarChart2,
   Plus,
   TrendingUp,
+  Heart,
+  Clock,
 } from 'lucide-react';
 import { Box, Flex, Grid } from '../components/common/Flex';
 import { Heading, Text } from '../components/common/Text';
@@ -22,7 +24,7 @@ import { Badge } from '../components/Badge';
 import { StatCard } from '../components/StatCard';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { fetchStatisticsRequest } from '../store/statisticsSlice';
-import { fetchSongsRequest, openCreateModal, setGenreFilter } from '../store/songsSlice';
+import { fetchSongsRequest, openCreateModal, setGenreFilter, setFavoriteFilter } from '../store/songsSlice';
 import { AppTheme } from '../theme/theme';
 
 const HeroBanner = styled.div`
@@ -136,6 +138,16 @@ export const Home: React.FC = () => {
     totalArtists: 0,
     totalAlbums: 0,
     totalGenres: 0,
+    totalFavorites: 0,
+    favoritePercentage: 0,
+  };
+
+  const durationMetrics = stats?.durationMetrics || {
+    averageDuration: 210,
+    formattedAverage: '3:30',
+    totalCatalogHours: 0,
+    longestSong: null,
+    shortestSong: null,
   };
 
   const topArtists = stats?.artists?.slice(0, 5) || [];
@@ -143,7 +155,13 @@ export const Home: React.FC = () => {
   const largestAlbums = stats?.albums?.slice(0, 5) || [];
 
   const handleGenreSelect = (genre: string) => {
+    dispatch(setFavoriteFilter(undefined));
     dispatch(setGenreFilter(genre));
+    navigate('/songs');
+  };
+
+  const handleFavoritesClick = () => {
+    dispatch(setFavoriteFilter(true));
     navigate('/songs');
   };
 
@@ -212,9 +230,9 @@ export const Home: React.FC = () => {
         </Flex>
       </HeroBanner>
 
-      {/* KPI Stats Strip */}
+      {/* KPI Stats Strip (6 Columns on Large Screens) */}
       <Grid
-        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(4, 1fr)']}
+        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)', 'repeat(6, 1fr)']}
         gap={3}
         mb={4}
       >
@@ -245,6 +263,19 @@ export const Home: React.FC = () => {
           subtitle="Music categories"
           icon={<Radio size={20} />}
           onClick={() => navigate('/statistics')}
+        />
+        <StatCard
+          title="Favorites"
+          value={overview.totalFavorites || 0}
+          subtitle={`${overview.favoritePercentage || 0}% of catalog`}
+          icon={<Heart size={20} fill="#FF4B5C" color="#FF4B5C" />}
+          onClick={handleFavoritesClick}
+        />
+        <StatCard
+          title="Avg Length"
+          value={durationMetrics.formattedAverage || '3:30'}
+          subtitle={`${durationMetrics.totalCatalogHours || 0} hrs total`}
+          icon={<Clock size={20} />}
         />
       </Grid>
 

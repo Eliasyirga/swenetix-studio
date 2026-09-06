@@ -5,6 +5,7 @@ export interface Song {
   album: string;
   genre: string;
   duration?: number;
+  isFavorite?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,6 +16,7 @@ export interface CreateSongDto {
   album: string;
   genre: string;
   duration?: number;
+  isFavorite?: boolean;
 }
 
 export interface UpdateSongDto {
@@ -27,6 +29,7 @@ export interface SongQueryFilters {
   genre?: string;
   artist?: string;
   album?: string;
+  favorite?: boolean;
   page?: number;
   limit?: number;
 }

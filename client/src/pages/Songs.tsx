@@ -7,6 +7,7 @@ import {
   Music,
   LayoutGrid,
   Table as TableIcon,
+  Heart,
 } from 'lucide-react';
 import { Box, Flex, Grid } from '../components/common/Flex';
 import { Heading, Text } from '../components/common/Text';
@@ -29,8 +30,10 @@ import {
   setGenreFilter,
   setArtistFilter,
   setAlbumFilter,
+  setFavoriteFilter,
   setPage,
   resetFilters,
+  toggleFavoriteRequest,
   createSongRequest,
   updateSongRequest,
   deleteSongRequest,
@@ -113,7 +116,7 @@ export const Songs: React.FC = () => {
   // Fetch songs when query parameters change
   useEffect(() => {
     dispatch(fetchSongsRequest(filters));
-  }, [dispatch, filters.genre, filters.artist, filters.album, filters.page, filters.search]);
+  }, [dispatch, filters.genre, filters.artist, filters.album, filters.favorite, filters.page, filters.search]);
 
   // Debounce search input
   useEffect(() => {
@@ -145,7 +148,8 @@ export const Songs: React.FC = () => {
     (filters.search && filters.search.trim() !== '') ||
     filters.genre !== 'All' ||
     filters.artist !== 'All' ||
-    filters.album !== 'All';
+    filters.album !== 'All' ||
+    filters.favorite !== undefined;
 
   return (
     <Box>
@@ -210,19 +214,44 @@ export const Songs: React.FC = () => {
 
       {/* Search & Filters Bar */}
       <FilterBar>
-        {/* Quick Genre Pills */}
+        {/* Quick Genre Pills + Favorites */}
         <Flex gap={2} mb={3} pb={2} overflowX="auto" style={{ scrollbarWidth: 'none' }}>
           <GenrePill
-            active={!filters.genre || filters.genre === 'All'}
-            onClick={() => dispatch(setGenreFilter('All'))}
+            active={!filters.favorite && (!filters.genre || filters.genre === 'All')}
+            onClick={() => {
+              dispatch(setFavoriteFilter(undefined));
+              dispatch(setGenreFilter('All'));
+            }}
           >
-            All Genres
+            All Tracks
           </GenrePill>
+
+          <GenrePill
+            active={filters.favorite === true}
+            onClick={() => {
+              dispatch(setFavoriteFilter(filters.favorite ? undefined : true));
+            }}
+            style={{
+              borderColor: filters.favorite ? '#FF4B5C' : undefined,
+              background: filters.favorite ? '#FF4B5C' : undefined,
+              color: filters.favorite ? '#fff' : undefined,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            <Heart size={13} fill={filters.favorite ? '#fff' : 'none'} color={filters.favorite ? '#fff' : '#FF4B5C'} />
+            Favorites
+          </GenrePill>
+
           {filterOptions.genres.map((g) => (
             <GenrePill
               key={g}
-              active={filters.genre === g}
-              onClick={() => dispatch(setGenreFilter(g))}
+              active={!filters.favorite && filters.genre === g}
+              onClick={() => {
+                dispatch(setFavoriteFilter(undefined));
+                dispatch(setGenreFilter(g));
+              }}
             >
               {g}
             </GenrePill>
@@ -311,6 +340,11 @@ export const Songs: React.FC = () => {
         {isFiltered && (
           <Flex alignItems="center" gap={2} mt={3} pt={3} borderTop="1px solid" borderColor="surfaceBorder" flexWrap="wrap">
             <Text fontSize={0} color="textMuted">Active Filters:</Text>
+            {filters.favorite && (
+              <Badge variant="primary" style={{ background: '#FF4B5C', borderColor: '#FF4B5C' }}>
+                ⭐ Favorites Only
+              </Badge>
+            )}
             {filters.search && (
               <Badge variant="primary">
                 Search: "{filters.search}"
@@ -359,6 +393,7 @@ export const Songs: React.FC = () => {
               songs={songs}
               onEdit={(song) => dispatch(openEditModal(song))}
               onDelete={(song) => dispatch(openDeleteModal(song))}
+              onToggleFavorite={(song) => dispatch(toggleFavoriteRequest(song.id))}
             />
           ) : (
             <Grid
@@ -371,11 +406,11 @@ export const Songs: React.FC = () => {
                   song={song}
                   onEdit={(s) => dispatch(openEditModal(s))}
                   onDelete={(s) => dispatch(openDeleteModal(s))}
+                  onToggleFavorite={(s) => dispatch(toggleFavoriteRequest(s.id))}
                 />
               ))}
             </Grid>
           )}
-
 
           {/* Pagination Controls */}
           <Pagination

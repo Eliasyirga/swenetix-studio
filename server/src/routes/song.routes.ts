@@ -18,6 +18,10 @@ router
   .route('/:id')
   .get(SongController.getSongById)
   .put(validateRequest(updateSongSchema), SongController.updateSong)
+  .patch(SongController.toggleFavorite)
   .delete(SongController.deleteSong);
+
+// Explicit toggle favorite endpoint
+router.patch('/:id/favorite', SongController.toggleFavorite);
 
 export default router;

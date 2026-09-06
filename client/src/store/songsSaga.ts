@@ -15,6 +15,9 @@ import {
   deleteSongRequest,
   deleteSongSuccess,
   deleteSongFailure,
+  toggleFavoriteRequest,
+  toggleFavoriteSuccess,
+  toggleFavoriteFailure,
   seedSongsRequest,
   seedSongsSuccess,
   seedSongsFailure,
@@ -36,6 +39,29 @@ function* handleFetchSongs(action: PayloadAction<SongQueryFilters | undefined>):
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to fetch songs';
     yield put(fetchSongsFailure(message));
+    yield put(showToast({ message, type: 'error' }));
+  }
+}
+
+function* handleToggleFavorite(action: PayloadAction<string>): Generator {
+  try {
+    const songId = action.payload;
+    const updated = (yield call(api.toggleFavorite, songId)) as Song;
+    yield put(toggleFavoriteSuccess(updated));
+    yield put(
+      showToast({
+        message: updated.isFavorite
+          ? `⭐ Added "${updated.title}" to favorites`
+          : `Removed "${updated.title}" from favorites`,
+        type: 'info',
+      })
+    );
+
+    // Refresh statistics to update favorites counts
+    yield put(fetchStatisticsRequest());
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to update favorite status';
+    yield put(toggleFavoriteFailure({ id: action.payload, error: message }));
     yield put(showToast({ message, type: 'error' }));
   }
 }
@@ -106,6 +132,7 @@ function* handleSeedSongs(): Generator {
 
 export function* songsSaga(): Generator {
   yield takeLatest(fetchSongsRequest.type, handleFetchSongs);
+  yield takeLatest(toggleFavoriteRequest.type, handleToggleFavorite);
   yield takeLatest(createSongRequest.type, handleCreateSong);
   yield takeLatest(updateSongRequest.type, handleUpdateSong);
   yield takeLatest(deleteSongRequest.type, handleDeleteSong);

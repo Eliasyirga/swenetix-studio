@@ -6,6 +6,7 @@ export interface ISong {
   album: string;
   genre: string;
   duration?: number; // optional in seconds for music app polish
+  isFavorite?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +54,11 @@ const songSchema = new Schema<ISongDocument>(
       default: 210, // default 3:30 in seconds
       min: [1, 'Duration must be at least 1 second'],
       max: [7200, 'Duration cannot exceed 2 hours'],
+    },
+    isFavorite: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
   },
   {

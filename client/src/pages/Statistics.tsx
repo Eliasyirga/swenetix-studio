@@ -11,6 +11,9 @@ import {
   Award,
   Flame,
   Layers,
+  Heart,
+  Clock,
+  Zap,
 } from 'lucide-react';
 import { Box, Flex, Grid } from '../components/common/Flex';
 import { Heading, Text } from '../components/common/Text';
@@ -21,7 +24,7 @@ import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { fetchStatisticsRequest } from '../store/statisticsSlice';
-import { setGenreFilter, setArtistFilter, setAlbumFilter } from '../store/songsSlice';
+import { setGenreFilter, setArtistFilter, setAlbumFilter, setFavoriteFilter } from '../store/songsSlice';
 import { AppTheme } from '../theme/theme';
 
 const BarTrack = styled.div`
@@ -84,6 +87,16 @@ export const Statistics: React.FC = () => {
     totalArtists: 0,
     totalAlbums: 0,
     totalGenres: 0,
+    totalFavorites: 0,
+    favoritePercentage: 0,
+  };
+
+  const durationMetrics = stats?.durationMetrics || {
+    averageDuration: 210,
+    formattedAverage: '3:30',
+    totalCatalogHours: 0,
+    longestSong: null,
+    shortestSong: null,
   };
 
   const songsByGenre = stats?.songsByGenre || [];
@@ -93,20 +106,29 @@ export const Statistics: React.FC = () => {
     mostProlificArtist: null,
     mostCommonGenre: null,
     largestAlbum: null,
+    mostFavoritedGenre: null,
   };
 
   const handleGenreClick = (genre: string) => {
+    dispatch(setFavoriteFilter(undefined));
     dispatch(setGenreFilter(genre));
     navigate('/songs');
   };
 
   const handleArtistClick = (artist: string) => {
+    dispatch(setFavoriteFilter(undefined));
     dispatch(setArtistFilter(artist));
     navigate('/songs');
   };
 
   const handleAlbumClick = (album: string) => {
+    dispatch(setFavoriteFilter(undefined));
     dispatch(setAlbumFilter(album));
+    navigate('/songs');
+  };
+
+  const handleFavoritesClick = () => {
+    dispatch(setFavoriteFilter(true));
     navigate('/songs');
   };
 
@@ -120,14 +142,14 @@ export const Statistics: React.FC = () => {
             Statistics & Analytics
           </Heading>
           <Text fontSize={1} color="textSecondary" mt="2px">
-            Real-time breakdown of songs, artists, albums, and genres.
+            Real-time breakdown of songs, artists, albums, favorites, and duration metrics.
           </Text>
         </Box>
       </Flex>
 
-      {/* 1. Overview KPIs */}
+      {/* 1. Overview KPIs (6 Columns on Large Screens) */}
       <Grid
-        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(4, 1fr)']}
+        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)', 'repeat(6, 1fr)']}
         gap={3}
         mb={4}
       >
@@ -136,6 +158,7 @@ export const Statistics: React.FC = () => {
           value={overview.totalSongs}
           subtitle="Catalog tracks"
           icon={<Music size={20} />}
+          onClick={() => navigate('/songs')}
         />
         <StatCard
           title="Total Artists"
@@ -155,11 +178,24 @@ export const Statistics: React.FC = () => {
           subtitle="Musical categories"
           icon={<Radio size={20} />}
         />
+        <StatCard
+          title="Starred Tracks"
+          value={overview.totalFavorites || 0}
+          subtitle={`${overview.favoritePercentage || 0}% of catalog`}
+          icon={<Heart size={20} fill="#FF4B5C" color="#FF4B5C" />}
+          onClick={handleFavoritesClick}
+        />
+        <StatCard
+          title="Avg Duration"
+          value={durationMetrics.formattedAverage || '3:30'}
+          subtitle={`${durationMetrics.totalCatalogHours || 0} hrs total`}
+          icon={<Clock size={20} />}
+        />
       </Grid>
 
       {/* 2. Key Highlights Strip */}
       <Grid
-        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']}
+        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(4, 1fr)']}
         gap={3}
         mb={4}
       >
@@ -219,6 +255,25 @@ export const Statistics: React.FC = () => {
             </Box>
           </Flex>
         </Card>
+
+        <Card>
+          <Flex alignItems="center" gap={3}>
+            <Box p={2} bg="primaryLight" borderRadius="md" color="#FF4B5C" flexShrink={0}>
+              <Zap size={22} />
+            </Box>
+            <Box overflow="hidden">
+              <Text fontSize={0} color="textSecondary" textTransform="uppercase" letterSpacing="0.04em">
+                Longest Catalog Track
+              </Text>
+              <Heading as="h4" fontSize={2} fontWeight="bold" color="text" truncate title={durationMetrics.longestSong?.title || 'None'}>
+                {durationMetrics.longestSong?.title || 'None'}
+              </Heading>
+              <Text fontSize={0} color="textMuted">
+                {durationMetrics.longestSong?.formatted || '0:00'} min ({durationMetrics.longestSong?.artist || 'Unknown'})
+              </Text>
+            </Box>
+          </Flex>
+        </Card>
       </Grid>
 
       {/* 3. Detailed Aggregation Panels */}
@@ -227,7 +282,6 @@ export const Statistics: React.FC = () => {
         gap={3}
         mb={4}
       >
-
         {/* Songs By Genre Visual Bar Chart */}
         <Card>
           <Flex alignItems="center" gap={2} mb={3}>

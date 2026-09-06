@@ -3,6 +3,8 @@ export interface StatisticsOverview {
   totalArtists: number;
   totalAlbums: number;
   totalGenres: number;
+  totalFavorites?: number;
+  favoritePercentage?: number;
 }
 
 export interface SongsByGenreItem {
@@ -23,10 +25,29 @@ export interface AlbumStatItem {
   totalSongs: number;
 }
 
+export interface DurationMetrics {
+  averageDuration: number;
+  formattedAverage: string;
+  totalCatalogHours: number;
+  longestSong: {
+    title: string;
+    artist: string;
+    duration: number;
+    formatted: string;
+  } | null;
+  shortestSong: {
+    title: string;
+    artist: string;
+    duration: number;
+    formatted: string;
+  } | null;
+}
+
 export interface StatisticsHighlights {
   mostProlificArtist: { artist: string; songCount: number } | null;
   mostCommonGenre: { genre: string; songCount: number } | null;
   largestAlbum: { album: string; artist: string; songCount: number } | null;
+  mostFavoritedGenre?: { genre: string; count: number } | null;
 }
 
 export interface StatisticsData {
@@ -34,6 +55,7 @@ export interface StatisticsData {
   songsByGenre: SongsByGenreItem[];
   artists: ArtistStatItem[];
   albums: AlbumStatItem[];
+  durationMetrics?: DurationMetrics;
   highlights: StatisticsHighlights;
 }
 
