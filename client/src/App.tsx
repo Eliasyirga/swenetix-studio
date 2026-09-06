@@ -5,9 +5,9 @@ import { CustomThemeProvider } from './theme/ThemeContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { Navbar } from './components/Navbar';
 import { Toast } from './components/Toast';
 import { LoadingScreen } from './components/LoadingScreen';
+
 import { AppRoutes } from './routes/AppRoutes';
 import { useAppDispatch } from './store/store';
 import { fetchSongsRequest } from './store/songsSlice';
@@ -38,18 +38,11 @@ const MainContent = styled.main`
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 28px 32px 48px 32px;
+  padding: 24px 28px 48px 28px;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    padding: 20px 16px 36px 16px;
-  }
-`;
-
-const MobileNavWrapper = styled.div`
-  display: none;
-  @media (max-width: 900px) {
-    display: block;
+    padding: 16px 12px 32px 12px;
   }
 `;
 
@@ -80,9 +73,6 @@ const AppInner: React.FC = () => {
       <LoadingScreen />
       <Sidebar />
       <MainContentArea>
-        <MobileNavWrapper>
-          <Navbar />
-        </MobileNavWrapper>
         <Header />
         <MainContent>
           <AppRoutes />
@@ -106,3 +96,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

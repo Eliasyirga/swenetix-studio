@@ -48,13 +48,19 @@ const FilterBar = styled.div`
   padding: 16px 20px;
   margin-bottom: 24px;
   box-shadow: ${(props) => props.theme.shadows.card};
+
+  @media (max-width: 768px) {
+    padding: 14px;
+    margin-bottom: 18px;
+  }
 `;
 
 const SearchInputWrapper = styled.div`
   position: relative;
   flex: 1;
-  min-width: 220px;
+  width: 100%;
 `;
+
 
 const SearchIcon = styled.div`
   position: absolute;
@@ -224,7 +230,7 @@ export const Songs: React.FC = () => {
         </Flex>
 
         <Grid
-          gridTemplateColumns={['1fr', '1fr', '2fr 1fr 1fr 1fr auto']}
+          gridTemplateColumns={['1fr', 'repeat(2, 1fr)', '2fr 1fr 1fr 1fr auto']}
           gap={2}
           alignItems="center"
         >
@@ -294,6 +300,7 @@ export const Songs: React.FC = () => {
                 dispatch(resetFilters());
               }}
               title="Clear all active search and filters"
+              style={{ width: '100%', justifyContent: 'center' }}
             >
               <RotateCcw size={13} /> Reset
             </Button>
@@ -355,7 +362,7 @@ export const Songs: React.FC = () => {
             />
           ) : (
             <Grid
-              gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']}
+              gridTemplateColumns={['1fr', 'repeat(auto-fill, minmax(260px, 1fr))']}
               gap={3}
             >
               {songs.map((song) => (
@@ -368,6 +375,7 @@ export const Songs: React.FC = () => {
               ))}
             </Grid>
           )}
+
 
           {/* Pagination Controls */}
           <Pagination

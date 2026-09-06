@@ -35,6 +35,11 @@ const HeroBanner = styled.div`
   overflow: hidden;
   box-shadow: ${(props) => props.theme.shadows.card};
 
+  @media (max-width: 768px) {
+    padding: 18px 16px;
+    margin-bottom: 20px;
+  }
+
   &::after {
     content: '';
     position: absolute;
@@ -46,6 +51,7 @@ const HeroBanner = styled.div`
     pointer-events: none;
   }
 `;
+
 
 const ModuleCard = styled(Card)`
   padding: 22px;

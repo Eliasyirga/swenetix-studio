@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Plus, Sun, Moon, PanelLeft } from 'lucide-react';
+import { Search, Plus, Sun, Moon, PanelLeft, Menu, Music2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { openCreateModal, setSearchFilter } from '../store/songsSlice';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -19,20 +19,29 @@ const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 0 24px;
   position: sticky;
   top: 0;
   z-index: 50;
   backdrop-filter: blur(12px);
   box-shadow: ${(props) => props.theme.shadows.sm};
+
+  @media (max-width: 768px) {
+    padding: 0 14px;
+    height: 58px;
+  }
 `;
 
 const SearchBarWrapper = styled.div`
   position: relative;
-  width: 360px;
+  width: 320px;
 
-  @media (max-width: 768px) {
-    width: 180px;
+  @media (max-width: 1024px) {
+    width: 220px;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
   }
 `;
 
@@ -87,6 +96,22 @@ const IconButton = styled.button`
     border-color: ${(props) => props.theme.colors.primary};
     transform: scale(1.05);
   }
+
+  @media (max-width: 768px) {
+    width: 34px;
+    height: 34px;
+  }
+`;
+
+const HeaderTitle = styled(Text)`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${(props) => props.theme.colors.text};
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 export const Header: React.FC = () => {
@@ -94,7 +119,7 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useAppTheme();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, toggleMobileSidebar } = useSidebar();
   const theme = useTheme() as AppTheme;
 
   const { filters } = useAppSelector((state) => state.songs);
@@ -119,26 +144,40 @@ export const Header: React.FC = () => {
       case '/songs':
         return 'Song Library';
       case '/statistics':
-        return 'Statistics & Analytics';
+        return 'Statistics';
       case '/overview':
-        return 'Overview Dashboard';
+        return 'Overview';
       default:
-        return 'Swenetix Studio';
+        return 'Swenetix';
     }
   };
 
   return (
     <HeaderContainer>
       {/* Left: Sidebar Pop Toggle & Page Title */}
-      <Flex alignItems="center" gap={3}>
-        <IconButton onClick={toggleSidebar} title="Toggle Sidebar (Pop-out / Pop-in)">
-          <PanelLeft size={17} color={theme.colors.primary} />
-        </IconButton>
-        <Box>
-          <Text fontSize={2} fontWeight="bold" color="text">
-            {getPageTitle()}
-          </Text>
+      <Flex alignItems="center" gap={2}>
+        {/* Mobile Menu Toggle button */}
+        <Box display={['block', 'none']}>
+          <IconButton onClick={toggleMobileSidebar} title="Open Menu" aria-label="Open Navigation Menu">
+            <Menu size={18} color={theme.colors.primary} />
+          </IconButton>
         </Box>
+
+        {/* Desktop Sidebar Toggle button */}
+        <Box display={['none', 'block']}>
+          <IconButton onClick={toggleSidebar} title="Toggle Sidebar (Collapse/Expand)" aria-label="Toggle Sidebar">
+            <PanelLeft size={17} color={theme.colors.primary} />
+          </IconButton>
+        </Box>
+
+        <Flex alignItems="center" gap={2}>
+          <Box display={['block', 'none']} color="primary">
+            <Music2 size={18} color={theme.colors.primary} />
+          </Box>
+          <HeaderTitle>
+            {getPageTitle()}
+          </HeaderTitle>
+        </Flex>
       </Flex>
 
       {/* Center: Universal Search */}
@@ -156,6 +195,7 @@ export const Header: React.FC = () => {
 
       {/* Right: Theme Switcher & Add Song Action */}
       <Flex alignItems="center" gap={2}>
+
         <IconButton
           onClick={toggleTheme}
           title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
@@ -171,12 +211,15 @@ export const Header: React.FC = () => {
           variant="primary"
           buttonSize="sm"
           onClick={() => dispatch(openCreateModal())}
-          style={{ padding: '7px 14px', fontSize: '13px' }}
+          style={{ padding: '7px 12px', fontSize: '13px' }}
         >
           <Plus size={15} />
-          <span>Add Song</span>
+          <Box as="span" display={['none', 'inline']}>
+            Add Song
+          </Box>
         </Button>
       </Flex>
     </HeaderContainer>
   );
 };
+

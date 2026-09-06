@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   PanelLeftClose,
   Sparkles,
+  X,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { openCreateModal, setGenreFilter } from '../store/songsSlice';
@@ -23,7 +24,25 @@ import { AppTheme } from '../theme/theme';
 import { Flex, Box } from './common/Flex';
 import { Text } from './common/Text';
 
-const SidebarContainer = styled.aside<{ isCollapsed: boolean }>`
+const BackdropOverlay = styled.div<{ isMobileOpen: boolean }>`
+  display: none;
+
+  @media (max-width: 900px) {
+    display: ${(props) => (props.isMobileOpen ? 'block' : 'none')};
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: ${(props) => (props.isMobileOpen ? 1 : 0)};
+    transition: opacity 0.25s ease;
+  }
+`;
+
+const SidebarContainer = styled.aside<{ isCollapsed: boolean; isMobileOpen: boolean }>`
   width: ${(props) => (props.isCollapsed ? '76px' : '260px')};
   background-color: ${(props) => props.theme.colors.surface};
   border-right: 1px solid ${(props) => props.theme.colors.surfaceBorder};
@@ -38,10 +57,17 @@ const SidebarContainer = styled.aside<{ isCollapsed: boolean }>`
   user-select: none;
   box-shadow: ${(props) => props.theme.shadows.sm};
   z-index: 60;
-  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 
   @media (max-width: 900px) {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 1050;
+    box-shadow: ${(props) => props.theme.shadows.lg};
+    transform: ${(props) => (props.isMobileOpen ? 'translateX(0)' : 'translateX(-100%)')};
   }
 `;
 
@@ -71,6 +97,10 @@ const SectionTitle = styled.div<{ isCollapsed: boolean }>`
   letter-spacing: 0.08em;
   padding: 6px 12px;
   display: ${(props) => (props.isCollapsed ? 'none' : 'block')};
+
+  @media (max-width: 900px) {
+    display: block;
+  }
 `;
 
 const StyledNavLink = styled(NavLink)<{ isCollapsed: boolean }>`
@@ -96,7 +126,13 @@ const StyledNavLink = styled(NavLink)<{ isCollapsed: boolean }>`
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(217, 28, 46, 0.35);
   }
+
+  @media (max-width: 900px) {
+    justify-content: space-between;
+    padding: 10px 14px;
+  }
 `;
+
 
 const GenrePill = styled.button<{ isActive?: boolean; isCollapsed: boolean }>`
   display: flex;
@@ -201,7 +237,7 @@ export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useAppTheme();
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, toggleSidebar, isMobileOpen, closeMobileSidebar } = useSidebar();
   const theme = useTheme() as AppTheme;
 
   const { pagination, filters } = useAppSelector((state) => state.songs);
@@ -211,27 +247,35 @@ export const Sidebar: React.FC = () => {
   const genreList = stats?.songsByGenre || [];
 
   const handleGenreClick = (genre: string) => {
+    closeMobileSidebar();
     dispatch(setGenreFilter(genre));
     if (location.pathname !== '/songs') {
       navigate('/songs');
     }
   };
 
+
+  const handleAddSong = () => {
+    closeMobileSidebar();
+    dispatch(openCreateModal());
+  };
+
   return (
-    <SidebarContainer isCollapsed={isCollapsed}>
-      {/* Brand Header with Interactive Pop up / Pop off Logo Toggle */}
-      <BrandSection
-        isCollapsed={isCollapsed}
-        onClick={toggleSidebar}
-        title={isCollapsed ? 'Click Logo to Expand Sidebar' : 'Click Logo to Collapse Sidebar'}
-      >
-        <Flex alignItems="center" justifyContent={isCollapsed ? 'center' : 'space-between'}>
-          <Flex alignItems="center" gap={3}>
-            <BrandIconBox>
-              <Music2 size={22} />
-            </BrandIconBox>
-            {!isCollapsed && (
-              <Box>
+    <>
+      <BackdropOverlay isMobileOpen={isMobileOpen} onClick={closeMobileSidebar} />
+      <SidebarContainer isCollapsed={isCollapsed} isMobileOpen={isMobileOpen}>
+        {/* Brand Header with Interactive Pop up / Pop off Logo Toggle */}
+        <BrandSection
+          isCollapsed={isCollapsed}
+          onClick={toggleSidebar}
+          title={isCollapsed ? 'Click Logo to Expand Sidebar' : 'Click Logo to Collapse Sidebar'}
+        >
+          <Flex alignItems="center" justifyContent={isCollapsed ? 'center' : 'space-between'}>
+            <Flex alignItems="center" gap={3}>
+              <BrandIconBox>
+                <Music2 size={22} />
+              </BrandIconBox>
+              <Box display={isCollapsed ? ['block', 'none'] : 'block'}>
                 <Text fontSize={2} fontWeight="bold" color="text" letterSpacing="-0.02em">
                   Swenetix
                 </Text>
@@ -239,102 +283,139 @@ export const Sidebar: React.FC = () => {
                   Studio
                 </Text>
               </Box>
-            )}
-          </Flex>
+            </Flex>
 
-          {!isCollapsed && (
-            <Box color="textMuted">
-              <PanelLeftClose size={16} />
+            {/* Desktop collapse icon / Mobile close button */}
+            <Box
+              color="textMuted"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.innerWidth <= 900) {
+                  closeMobileSidebar();
+                } else {
+                  toggleSidebar();
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <Box display={['block', 'none']}>
+                <X size={20} />
+              </Box>
+              <Box display={['none', isCollapsed ? 'none' : 'block']}>
+                <PanelLeftClose size={16} />
+              </Box>
             </Box>
-          )}
-        </Flex>
-      </BrandSection>
-
-      {/* Main Navigation */}
-      <NavSection>
-        <SectionTitle isCollapsed={isCollapsed}>Menu</SectionTitle>
-        <StyledNavLink to="/" isCollapsed={isCollapsed} title="Home / Start Showcase">
-          <Flex alignItems="center" gap={2}>
-            <Sparkles size={18} />
-            {!isCollapsed && <span>Showcase Home</span>}
           </Flex>
-          {!isCollapsed && <ChevronRight size={14} color={theme.colors.textMuted} />}
-        </StyledNavLink>
+        </BrandSection>
 
-        <StyledNavLink to="/songs" end isCollapsed={isCollapsed} title="Song Library">
-          <Flex alignItems="center" gap={2}>
-            <Layers size={18} />
-            {!isCollapsed && <span>Song Library</span>}
-          </Flex>
-          {!isCollapsed && <CountBadge>{totalSongs}</CountBadge>}
-        </StyledNavLink>
+        {/* Main Navigation */}
+        <NavSection>
+          <SectionTitle isCollapsed={isCollapsed}>Menu</SectionTitle>
+          <StyledNavLink
+            to="/"
+            isCollapsed={isCollapsed}
+            title="Home / Start Showcase"
+            onClick={closeMobileSidebar}
+          >
+            <Flex alignItems="center" gap={2}>
+              <Sparkles size={18} />
+              <span className="nav-label">Showcase Home</span>
+            </Flex>
+            <ChevronRight size={14} color={theme.colors.textMuted} />
+          </StyledNavLink>
 
-        <StyledNavLink to="/statistics" isCollapsed={isCollapsed} title="Statistics">
-          <Flex alignItems="center" gap={2}>
-            <BarChart3 size={18} />
-            {!isCollapsed && <span>Statistics</span>}
-          </Flex>
-          {!isCollapsed && <ChevronRight size={14} color={theme.colors.textMuted} />}
-        </StyledNavLink>
+          <StyledNavLink
+            to="/songs"
+            end
+            isCollapsed={isCollapsed}
+            title="Song Library"
+            onClick={closeMobileSidebar}
+          >
+            <Flex alignItems="center" gap={2}>
+              <Layers size={18} />
+              <span className="nav-label">Song Library</span>
+            </Flex>
+            <CountBadge>{totalSongs}</CountBadge>
+          </StyledNavLink>
 
-        <StyledNavLink to="/overview" isCollapsed={isCollapsed} title="Overview Dashboard">
-          <Flex alignItems="center" gap={2}>
-            <LayoutDashboard size={18} />
-            {!isCollapsed && <span>Overview</span>}
-          </Flex>
-          {!isCollapsed && <ChevronRight size={14} color={theme.colors.textMuted} />}
-        </StyledNavLink>
-      </NavSection>
+          <StyledNavLink
+            to="/statistics"
+            isCollapsed={isCollapsed}
+            title="Statistics"
+            onClick={closeMobileSidebar}
+          >
+            <Flex alignItems="center" gap={2}>
+              <BarChart3 size={18} />
+              <span className="nav-label">Statistics</span>
+            </Flex>
+            <ChevronRight size={14} color={theme.colors.textMuted} />
+          </StyledNavLink>
 
-      {/* Primary Action Button */}
-      <NavSection>
-        <PrimaryActionButton
-          isCollapsed={isCollapsed}
-          onClick={() => dispatch(openCreateModal())}
-          title="Add New Song"
-        >
-          <PlusCircle size={18} />
-          {!isCollapsed && <span>Add New Song</span>}
-        </PrimaryActionButton>
-      </NavSection>
-
-      {/* Genre Filter Channels (shown when expanded) */}
-      {!isCollapsed && genreList.length > 0 && (
-        <NavSection style={{ flex: 1, overflowY: 'auto' }}>
-          <SectionTitle isCollapsed={isCollapsed}>Genres</SectionTitle>
-          {genreList.map((g) => {
-            const isSelected = filters.genre === g.genre;
-            return (
-              <GenrePill
-                key={g.genre}
-                isActive={isSelected}
-                isCollapsed={isCollapsed}
-                onClick={() => handleGenreClick(g.genre)}
-              >
-                <Flex alignItems="center" gap={2}>
-                  <Radio size={13} color={isSelected ? theme.colors.primary : theme.colors.textMuted} />
-                  <span>{g.genre}</span>
-                </Flex>
-                <CountBadge isActive={isSelected}>{g.count}</CountBadge>
-              </GenrePill>
-            );
-          })}
+          <StyledNavLink
+            to="/overview"
+            isCollapsed={isCollapsed}
+            title="Overview Dashboard"
+            onClick={closeMobileSidebar}
+          >
+            <Flex alignItems="center" gap={2}>
+              <LayoutDashboard size={18} />
+              <span className="nav-label">Overview</span>
+            </Flex>
+            <ChevronRight size={14} color={theme.colors.textMuted} />
+          </StyledNavLink>
         </NavSection>
-      )}
 
-      {/* Clean Theme Toggle Footer */}
-      <BottomFooterBox>
-        <ThemeSwitchBtn
-          isCollapsed={isCollapsed}
-          onClick={toggleTheme}
-          title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-        >
-          <Flex alignItems="center" gap={2}>
-            {mode === 'light' ? <Moon size={16} color={theme.colors.primary} /> : <Sun size={16} color={theme.colors.primary} />}
-            {!isCollapsed && <span>{mode === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
-          </Flex>
-        </ThemeSwitchBtn>
-      </BottomFooterBox>
-    </SidebarContainer>
+        {/* Primary Action Button */}
+        <NavSection>
+          <PrimaryActionButton
+            isCollapsed={isCollapsed}
+            onClick={handleAddSong}
+            title="Add New Song"
+          >
+            <PlusCircle size={18} />
+            <span>Add New Song</span>
+          </PrimaryActionButton>
+        </NavSection>
+
+        {/* Genre Filter Channels */}
+        {genreList.length > 0 && (
+          <NavSection style={{ flex: 1, overflowY: 'auto' }}>
+            <SectionTitle isCollapsed={isCollapsed}>Genres</SectionTitle>
+            {genreList.map((g) => {
+              const isSelected = filters.genre === g.genre;
+              return (
+                <GenrePill
+                  key={g.genre}
+                  isActive={isSelected}
+                  isCollapsed={isCollapsed}
+                  onClick={() => handleGenreClick(g.genre)}
+                >
+                  <Flex alignItems="center" gap={2}>
+                    <Radio size={13} color={isSelected ? theme.colors.primary : theme.colors.textMuted} />
+                    <span>{g.genre}</span>
+                  </Flex>
+                  <CountBadge isActive={isSelected}>{g.count}</CountBadge>
+                </GenrePill>
+              );
+            })}
+          </NavSection>
+        )}
+
+        {/* Clean Theme Toggle Footer */}
+        <BottomFooterBox>
+          <ThemeSwitchBtn
+            isCollapsed={isCollapsed}
+            onClick={toggleTheme}
+            title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+          >
+            <Flex alignItems="center" gap={2}>
+              {mode === 'light' ? <Moon size={16} color={theme.colors.primary} /> : <Sun size={16} color={theme.colors.primary} />}
+              <span>{mode === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            </Flex>
+          </ThemeSwitchBtn>
+        </BottomFooterBox>
+      </SidebarContainer>
+    </>
   );
 };
+

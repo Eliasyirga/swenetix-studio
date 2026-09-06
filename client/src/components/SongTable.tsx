@@ -10,6 +10,7 @@ import { Text } from './common/Text';
 const TableWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: ${(props) => props.theme.colors.surface};
   border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   border-radius: ${(props) => props.theme.radii.lg};
@@ -18,9 +19,11 @@ const TableWrapper = styled.div`
 
 const StyledTable = styled.table`
   width: 100%;
+  min-width: 580px;
   border-collapse: collapse;
   text-align: left;
 `;
+
 
 const Th = styled.th`
   padding: 14px 18px;

@@ -159,20 +159,20 @@ export const Statistics: React.FC = () => {
 
       {/* 2. Key Highlights Strip */}
       <Grid
-        gridTemplateColumns={['1fr', '1fr', 'repeat(3, 1fr)']}
+        gridTemplateColumns={['1fr', 'repeat(2, 1fr)', 'repeat(3, 1fr)']}
         gap={3}
         mb={4}
       >
         <Card>
           <Flex alignItems="center" gap={3}>
-            <Box p={2} bg="primaryLight" borderRadius="md" color="primary">
+            <Box p={2} bg="primaryLight" borderRadius="md" color="primary" flexShrink={0}>
               <Award size={22} />
             </Box>
-            <Box>
+            <Box overflow="hidden">
               <Text fontSize={0} color="textSecondary" textTransform="uppercase" letterSpacing="0.04em">
                 Most Prolific Artist
               </Text>
-              <Heading as="h4" fontSize={2} fontWeight="bold" color="text">
+              <Heading as="h4" fontSize={2} fontWeight="bold" color="text" truncate title={highlights.mostProlificArtist?.artist || 'None'}>
                 {highlights.mostProlificArtist?.artist || 'None'}
               </Heading>
               <Text fontSize={0} color="textMuted">
@@ -184,14 +184,14 @@ export const Statistics: React.FC = () => {
 
         <Card>
           <Flex alignItems="center" gap={3}>
-            <Box p={2} bg="secondaryLight" borderRadius="md" color="secondary">
+            <Box p={2} bg="secondaryLight" borderRadius="md" color="secondary" flexShrink={0}>
               <Flame size={22} />
             </Box>
-            <Box>
+            <Box overflow="hidden">
               <Text fontSize={0} color="textSecondary" textTransform="uppercase" letterSpacing="0.04em">
                 Most Common Genre
               </Text>
-              <Heading as="h4" fontSize={2} fontWeight="bold" color="text">
+              <Heading as="h4" fontSize={2} fontWeight="bold" color="text" truncate title={highlights.mostCommonGenre?.genre || 'None'}>
                 {highlights.mostCommonGenre?.genre || 'None'}
               </Heading>
               <Text fontSize={0} color="textMuted">
@@ -203,10 +203,10 @@ export const Statistics: React.FC = () => {
 
         <Card>
           <Flex alignItems="center" gap={3}>
-            <Box p={2} bg="successLight" borderRadius="md" color="success">
+            <Box p={2} bg="successLight" borderRadius="md" color="success" flexShrink={0}>
               <Layers size={22} />
             </Box>
-            <Box>
+            <Box overflow="hidden">
               <Text fontSize={0} color="textSecondary" textTransform="uppercase" letterSpacing="0.04em">
                 Album with Most Songs
               </Text>
@@ -227,6 +227,7 @@ export const Statistics: React.FC = () => {
         gap={3}
         mb={4}
       >
+
         {/* Songs By Genre Visual Bar Chart */}
         <Card>
           <Flex alignItems="center" gap={2} mb={3}>

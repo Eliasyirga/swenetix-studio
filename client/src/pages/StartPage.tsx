@@ -104,15 +104,21 @@ const TopNav = styled.header`
   justify-content: space-between;
   padding-bottom: 20px;
   border-bottom: 1px solid ${(props) => props.theme.colors.surfaceBorder};
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
   transition: border-color 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding-bottom: 14px;
+    gap: 12px;
+  }
 `;
 
 const NavBrandGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
 `;
 
 const BrandBadge = styled.div`
@@ -121,10 +127,10 @@ const BrandBadge = styled.div`
   gap: 8px;
   background-color: ${(props) => props.theme.colors.primary};
   color: #FFFFFF;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 6px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
@@ -139,10 +145,10 @@ const BrandBadge = styled.div`
 
 const SearchBox = styled.div`
   position: relative;
-  width: 280px;
+  width: 260px;
 
   @media (max-width: 600px) {
-    width: 180px;
+    display: none;
   }
 `;
 
@@ -181,10 +187,12 @@ const SearchIconWrapper = styled.div`
 const NavLinksList = styled.div`
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
 
   @media (max-width: 768px) {
-    gap: 16px;
+    gap: 12px;
+    width: 100%;
+    justify-content: space-between;
   }
 `;
 
@@ -192,7 +200,7 @@ const NavLinkItem = styled.button`
   background: transparent;
   border: none;
   color: ${(props) => props.theme.colors.textSecondary};
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
   transition: color 0.15s ease;
@@ -204,8 +212,8 @@ const NavLinkItem = styled.button`
 `;
 
 const AvatarToggle = styled.button`
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background-color: ${(props) => props.theme.colors.primaryLight};
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
@@ -238,7 +246,8 @@ const HeroBody = styled.main`
 
   @media (max-width: 960px) {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 28px;
+    padding: 16px 0;
   }
 `;
 
@@ -250,13 +259,13 @@ const HeroLeft = styled.div`
 
 const MainHeading = styled.h1`
   font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(38px, 5.2vw, 64px);
+  font-size: clamp(32px, 5.2vw, 64px);
   font-weight: 800;
-  line-height: 1.06;
+  line-height: 1.08;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: ${(props) => props.theme.colors.text};
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   transition: color 0.3s ease;
 `;
 
@@ -264,7 +273,7 @@ const SubHeading = styled.p`
   font-size: clamp(14px, 1.5vw, 16px);
   line-height: 1.6;
   color: ${(props) => props.theme.colors.textSecondary};
-  margin: 0 0 32px 0;
+  margin: 0 0 28px 0;
   font-weight: 400;
   max-width: 520px;
   transition: color 0.3s ease;
@@ -273,12 +282,18 @@ const SubHeading = styled.p`
 const ButtonGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 52px;
+  gap: 12px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
 
-  @media (max-width: 768px) {
-    margin-bottom: 32px;
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
   }
 `;
 
@@ -287,7 +302,7 @@ const PrimaryPillBtn = styled.button`
   color: #FFFFFF;
   border: none;
   border-radius: 9999px;
-  padding: 13px 32px;
+  padding: 12px 28px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -313,7 +328,7 @@ const SecondaryPillBtn = styled.button`
   color: ${(props) => props.theme.colors.text};
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
   border-radius: 9999px;
-  padding: 13px 28px;
+  padding: 12px 24px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -337,23 +352,29 @@ const SecondaryPillBtn = styled.button`
 const StatsStrip = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: 28px;
+  gap: 24px;
+  flex-wrap: wrap;
 
   @media (max-width: 600px) {
-    flex-direction: column;
     gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 `;
 
 const StatItem = styled.div`
   display: flex;
   flex-direction: column;
-  min-width: 110px;
 `;
 
 const StatDivider = styled.div`
   width: 1px;
-  height: 48px;
+  height: 44px;
   background: ${(props) => props.theme.colors.surfaceBorder};
   align-self: center;
 
@@ -364,7 +385,7 @@ const StatDivider = styled.div`
 
 const StatNumber = styled.div`
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(22px, 2.5vw, 28px);
+  font-size: clamp(20px, 2.5vw, 26px);
   font-weight: 800;
   color: ${(props) => props.theme.colors.text};
   line-height: 1.1;
@@ -374,13 +395,13 @@ const StatNumber = styled.div`
 
 const StatLabel = styled.div`
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.35;
   color: ${(props) => props.theme.colors.textMuted};
   max-width: 120px;
   transition: color 0.3s ease;
 `;
 
-// Right Visual Area: Isolated Transparent Floating Studio Headphones & Interactive Audio Deck
+// Right Visual Area
 const HeroRight = styled.div`
   position: relative;
   display: flex;
@@ -393,7 +414,7 @@ const HeroRight = styled.div`
 const RealisticHeadphonesShowcase = styled.div`
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 380px;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -401,10 +422,14 @@ const RealisticHeadphonesShowcase = styled.div`
   background: transparent;
   animation: floatRealisticHeadphones 5s ease-in-out infinite alternate;
 
+  @media (max-width: 600px) {
+    max-width: 260px;
+  }
+
   @keyframes floatRealisticHeadphones {
     0% { transform: translateY(0px) rotate(0deg) scale(1); }
-    50% { transform: translateY(-14px) rotate(0.8deg) scale(1.015); }
-    100% { transform: translateY(8px) rotate(-0.8deg) scale(0.995); }
+    50% { transform: translateY(-10px) rotate(0.8deg) scale(1.015); }
+    100% { transform: translateY(6px) rotate(-0.8deg) scale(0.995); }
   }
 `;
 
@@ -424,17 +449,24 @@ const FloatingAudioCard = styled.div<{ isPlaying: boolean }>`
   background: ${(props) => props.theme.colors.surface};
   border: 1px solid ${(props) => (props.isPlaying ? props.theme.colors.primary : props.theme.colors.surfaceBorder)};
   border-radius: 14px;
-  padding: 14px 20px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  max-width: 440px;
+  max-width: 420px;
   box-shadow: ${(props) => props.theme.shadows.lg};
   transition: all 0.2s ease;
   z-index: 10;
-  margin-top: -36px;
+  margin-top: -24px;
+
+  @media (max-width: 600px) {
+    margin-top: -10px;
+    padding: 10px 14px;
+    gap: 10px;
+  }
 `;
+
 
 const PlayIconBtn = styled.button`
   width: 42px;

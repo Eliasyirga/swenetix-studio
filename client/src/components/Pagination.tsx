@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Flex } from './common/Flex';
+import { Flex, Box } from './common/Flex';
 import { Text } from './common/Text';
 import { Button } from './Button';
 import { PaginationMeta } from '../types/song';
@@ -45,6 +45,29 @@ const PageButton = styled.button<{ isActive?: boolean }>`
   }
 `;
 
+const PaginationContainer = styled(Flex)`
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid ${(props) => props.theme.colors.surfaceBorder};
+  margin-top: 16px;
+
+  @media (max-width: 640px) {
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+  }
+`;
+
+const PaginationControls = styled(Flex)`
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
 export interface PaginationProps {
   meta: PaginationMeta;
   onPageChange: (page: number) => void;
@@ -58,7 +81,7 @@ export const Pagination: React.FC<PaginationProps> = ({ meta, onPageChange }) =>
   const startItem = (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
 
-  // Generate visible page numbers
+  // Generate visible page numbers (fewer on mobile)
   const getPageNumbers = () => {
     const pages: number[] = [];
     const maxVisible = 5;
@@ -78,29 +101,22 @@ export const Pagination: React.FC<PaginationProps> = ({ meta, onPageChange }) =>
   const pages = getPageNumbers();
 
   return (
-    <Flex
-      justifyContent="space-between"
-      alignItems="center"
-      flexWrap="wrap"
-      gap={3}
-      pt={3}
-      borderTop="1px solid"
-      borderColor="surfaceBorder"
-      mt={3}
-    >
-      <Text fontSize={1} color="textSecondary">
+    <PaginationContainer>
+      <Text fontSize={1} color="textSecondary" textAlign={['center', 'left']}>
         Showing <strong style={{ color: 'inherit' }}>{startItem}–{endItem}</strong> of <strong style={{ color: 'inherit' }}>{total}</strong>
       </Text>
 
-      <Flex alignItems="center" gap={1}>
+      <PaginationControls>
         <Button
           variant="secondary"
           buttonSize="sm"
           onClick={() => onPageChange(page - 1)}
           disabled={!hasPrevPage}
           aria-label="Previous page"
+          style={{ padding: '6px 10px' }}
         >
-          <ChevronLeft size={14} /> Previous
+          <ChevronLeft size={14} />
+          <Box as="span" display={['none', 'inline']}>Prev</Box>
         </Button>
 
         {pages.map((p) => (
@@ -119,10 +135,12 @@ export const Pagination: React.FC<PaginationProps> = ({ meta, onPageChange }) =>
           onClick={() => onPageChange(page + 1)}
           disabled={!hasNextPage}
           aria-label="Next page"
+          style={{ padding: '6px 10px' }}
         >
-          Next <ChevronRight size={14} />
+          <Box as="span" display={['none', 'inline']}>Next</Box>
+          <ChevronRight size={14} />
         </Button>
-      </Flex>
-    </Flex>
+      </PaginationControls>
+    </PaginationContainer>
   );
 };

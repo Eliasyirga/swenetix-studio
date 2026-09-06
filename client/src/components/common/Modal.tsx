@@ -19,7 +19,7 @@ const Overlay = styled.div<{ isOpen: boolean }>`
   opacity: ${(props) => (props.isOpen ? 1 : 0)};
   visibility: ${(props) => (props.isOpen ? 'visible' : 'hidden')};
   transition: all 0.25s ease-in-out;
-  padding: 16px;
+  padding: 12px;
 `;
 
 const ModalContainer = styled.div<{ isOpen: boolean; maxWidth?: string }>`
@@ -28,7 +28,7 @@ const ModalContainer = styled.div<{ isOpen: boolean; maxWidth?: string }>`
   border-radius: ${(props) => props.theme.radii.xl};
   box-shadow: ${(props) => props.theme.shadows.lg}, 0 0 40px rgba(0, 0, 0, 0.6);
   width: 100%;
-  max-width: ${(props) => props.maxWidth || '520px'};
+  max-width: ${(props) => (props.maxWidth ? `min(94vw, ${props.maxWidth})` : 'min(94vw, 520px)')};
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
@@ -40,13 +40,18 @@ const ModalHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid ${(props) => props.theme.colors.surfaceBorder};
 `;
 
 const ModalBody = styled.div`
-  padding: 24px;
+  padding: 20px;
+
+  @media (max-width: 480px) {
+    padding: 16px 14px;
+  }
 `;
+
 
 export interface ModalProps {
   isOpen: boolean;
