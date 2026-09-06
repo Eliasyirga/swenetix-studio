@@ -8,7 +8,11 @@ import {
 } from '../types/song';
 import { StatisticsData, ApiResponse } from '../types/statistics';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://swenetix-studio.onrender.com/api'
+    : 'http://localhost:5000/api');
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -16,6 +20,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
 
 export const api = {
   // Songs API
