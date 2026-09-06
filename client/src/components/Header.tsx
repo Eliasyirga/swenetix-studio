@@ -114,6 +114,20 @@ const HeaderTitle = styled(Text)`
   }
 `;
 
+const MobileMenuWrapper = styled.div`
+  display: none;
+  @media (max-width: 900px) {
+    display: block;
+  }
+`;
+
+const DesktopToggleWrapper = styled.div`
+  display: block;
+  @media (max-width: 900px) {
+    display: none;
+  }
+`;
+
 export const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -156,23 +170,27 @@ export const Header: React.FC = () => {
     <HeaderContainer>
       {/* Left: Sidebar Pop Toggle & Page Title */}
       <Flex alignItems="center" gap={2}>
-        {/* Mobile Menu Toggle button */}
-        <Box display={['block', 'none']}>
+        {/* Mobile Menu Toggle button (<= 900px) */}
+        <MobileMenuWrapper>
           <IconButton onClick={toggleMobileSidebar} title="Open Menu" aria-label="Open Navigation Menu">
             <Menu size={18} color={theme.colors.primary} />
           </IconButton>
-        </Box>
+        </MobileMenuWrapper>
 
-        {/* Desktop Sidebar Toggle button */}
-        <Box display={['none', 'block']}>
+        {/* Desktop Sidebar Toggle button (> 900px) */}
+        <DesktopToggleWrapper>
           <IconButton
             onClick={toggleSidebar}
-            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            title={isCollapsed ? 'Expand Sidebar (Pop in)' : 'Collapse Sidebar (Pop out)'}
             aria-label="Toggle Sidebar"
+            style={{
+              borderColor: isCollapsed ? theme.colors.primary : undefined,
+              backgroundColor: isCollapsed ? theme.colors.primaryLight : undefined,
+            }}
           >
             <PanelLeft size={17} color={theme.colors.primary} />
           </IconButton>
-        </Box>
+        </DesktopToggleWrapper>
 
         <Flex alignItems="center" gap={2}>
           <Box display={['block', 'none']} color="primary">
@@ -183,6 +201,7 @@ export const Header: React.FC = () => {
           </HeaderTitle>
         </Flex>
       </Flex>
+
 
 
       {/* Center: Universal Search */}
