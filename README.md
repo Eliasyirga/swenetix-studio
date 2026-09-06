@@ -2,17 +2,23 @@
 ### Production Full-Stack Song Management Application & Analytics Platform
 Built for the **Addis Software Test Project - MERN Stack** assessment.
 
+[![Live Demo Frontend](https://img.shields.io/badge/Live%20Demo-Vercel%20Frontend-000000?style=for-the-badge&logo=vercel)](https://swenetixstudio.vercel.app/songs)
+[![Live Backend API](https://img.shields.io/badge/Live%20API-Render%20Cloud-46E3B7?style=for-the-badge&logo=render)](https://swenetix-studio.onrender.com/api/health)
 [![Tech Stack](https://img.shields.io/badge/Stack-MERN%20%7C%20TypeScript%20%7C%20Redux--Saga%20%7C%20Emotion-6366f1?style=for-the-badge)](https://github.com)
 [![Database](https://img.shields.io/badge/Database-MongoDB%20Atlas%207.0-47A248?style=for-the-badge&logo=mongodb)](https://cloud.mongodb.com)
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage%20Compose-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%20Zero%20Any-3178C6?style=for-the-badge&logo=typescript)](https://typescriptlang.org)
 
+🌐 **Live Deployments:**
+- **Frontend Web App (Vercel)**: [https://swenetixstudio.vercel.app/songs](https://swenetixstudio.vercel.app/songs)
+- **Backend REST API (Render)**: [https://swenetix-studio.onrender.com/api](https://swenetix-studio.onrender.com/api)
+- **API Healthcheck**: [https://swenetix-studio.onrender.com/api/health](https://swenetix-studio.onrender.com/api/health)
 
 > 📚 **Developer & Engineering Documentation Guides:**
-> - [🏛️ System Architecture & Design](file:///e:/dasktopp/my_proj/song-management-app/docs/ARCHITECTURE.md)
-> - [👨‍💻 Developer Onboarding & Contribution Guide](file:///e:/dasktopp/my_proj/song-management-app/docs/DEVELOPER_GUIDE.md)
-> - [📡 Complete REST API Reference](file:///e:/dasktopp/my_proj/song-management-app/docs/API_DOCUMENTATION.md)
-> - [🚀 Production Deployment Guide (Vercel, Render, Docker)](file:///e:/dasktopp/my_proj/song-management-app/docs/DEPLOYMENT_GUIDE.md)
+> - [🏛️ System Architecture & Design](./docs/ARCHITECTURE.md)
+> - [👨‍💻 Developer Onboarding & Contribution Guide](./docs/DEVELOPER_GUIDE.md)
+> - [📡 Complete REST API Reference](./docs/API_DOCUMENTATION.md)
+> - [🚀 Production Deployment Guide (Vercel, Render, Docker)](./docs/DEPLOYMENT_GUIDE.md)
 
 ---
 
