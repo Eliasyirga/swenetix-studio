@@ -126,12 +126,20 @@ const songsSlice = createSlice({
       const index = state.items.findIndex((s) => s.id === action.payload);
       if (index !== -1) {
         state.items[index].isFavorite = !state.items[index].isFavorite;
+        if (state.filters.favorite && !state.items[index].isFavorite) {
+          state.items.splice(index, 1);
+          state.pagination.total = Math.max(0, state.pagination.total - 1);
+        }
       }
     },
     toggleFavoriteSuccess: (state, action: PayloadAction<Song>) => {
       const index = state.items.findIndex((s) => s.id === action.payload.id);
       if (index !== -1) {
         state.items[index] = action.payload;
+        if (state.filters.favorite && !action.payload.isFavorite) {
+          state.items.splice(index, 1);
+          state.pagination.total = Math.max(0, state.pagination.total - 1);
+        }
       }
     },
     toggleFavoriteFailure: (state, action: PayloadAction<{ id: string; error: string }>) => {

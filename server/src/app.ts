@@ -15,7 +15,7 @@ export const createApp = (): Application => {
   app.use(
     cors({
       origin: config.corsOrigin === '*' ? '*' : config.corsOrigin.split(','),
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     })
   );
