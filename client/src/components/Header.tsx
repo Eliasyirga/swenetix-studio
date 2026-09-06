@@ -119,7 +119,7 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggleTheme } = useAppTheme();
-  const { toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { toggleSidebar, toggleMobileSidebar, isCollapsed } = useSidebar();
   const theme = useTheme() as AppTheme;
 
   const { filters } = useAppSelector((state) => state.songs);
@@ -165,7 +165,11 @@ export const Header: React.FC = () => {
 
         {/* Desktop Sidebar Toggle button */}
         <Box display={['none', 'block']}>
-          <IconButton onClick={toggleSidebar} title="Toggle Sidebar (Collapse/Expand)" aria-label="Toggle Sidebar">
+          <IconButton
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            aria-label="Toggle Sidebar"
+          >
             <PanelLeft size={17} color={theme.colors.primary} />
           </IconButton>
         </Box>
@@ -179,6 +183,7 @@ export const Header: React.FC = () => {
           </HeaderTitle>
         </Flex>
       </Flex>
+
 
       {/* Center: Universal Search */}
       <SearchBarWrapper>
