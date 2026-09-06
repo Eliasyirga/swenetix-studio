@@ -380,6 +380,7 @@ export const Songs: React.FC = () => {
       ) : songs.length === 0 ? (
         <EmptyState
           isFiltered={!!isFiltered}
+          isFavoriteFilter={!!filters.favorite}
           onAddSong={() => dispatch(openCreateModal())}
           onClearFilters={() => {
             setLocalSearch('');
