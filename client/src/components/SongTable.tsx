@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Edit2, Trash2, Disc, Heart } from 'lucide-react';
+import { Edit2, Trash2, Heart, Play, Pause } from 'lucide-react';
 import { Song } from '../types/song';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Flex, Box } from './common/Flex';
@@ -43,8 +44,9 @@ const Td = styled.td`
   font-size: 14px;
 `;
 
-const Tr = styled.tr`
+const Tr = styled.tr<{ isCurrent?: boolean }>`
   transition: all 0.15s ease;
+  background: ${(props) => (props.isCurrent ? props.theme.colors.surfaceLight : 'transparent')};
 
   &:hover {
     background: ${(props) => props.theme.colors.surfaceHover};
@@ -55,17 +57,26 @@ const Tr = styled.tr`
   }
 `;
 
-const TrackIconBox = styled(Box)`
+const TrackIconBtn = styled.button<{ isPlaying?: boolean }>`
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background-color: ${(props) => props.theme.colors.primaryLight};
+  background-color: ${(props) =>
+    props.isPlaying ? props.theme.colors.primary : props.theme.colors.primaryLight};
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
-  color: ${(props) => props.theme.colors.primary};
+  color: ${(props) => (props.isPlaying ? '#FFFFFF' : props.theme.colors.primary)};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primary};
+    color: #FFFFFF;
+    transform: scale(1.08);
+  }
 `;
 
 const HeartButton = styled.button<{ isFavorite?: boolean }>`
@@ -100,6 +111,16 @@ export const SongTable: React.FC<SongTableProps> = ({
   onDelete,
   onToggleFavorite,
 }) => {
+  const { currentSong, isPlaying, playSong, togglePlay } = useAudioPlayer();
+
+  const handlePlayClick = (song: Song) => {
+    if (currentSong?.id === song.id) {
+      togglePlay();
+    } else {
+      playSong(song, songs);
+    }
+  };
+
   return (
     <TableWrapper>
       <StyledTable>
@@ -115,72 +136,82 @@ export const SongTable: React.FC<SongTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {songs.map((song, index) => (
-            <Tr key={song.id}>
-              <Td style={{ color: 'inherit', opacity: 0.6, fontFamily: 'monospace', fontSize: '13px' }}>
-                {(index + 1).toString().padStart(2, '0')}
-              </Td>
-              <Td style={{ padding: '14px 8px' }}>
-                <HeartButton
-                  isFavorite={song.isFavorite}
-                  onClick={() => onToggleFavorite?.(song)}
-                  title={song.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                  aria-label="Toggle favorite"
-                >
-                  <Heart
-                    size={16}
-                    fill={song.isFavorite ? '#FF4B5C' : 'transparent'}
-                  />
-                </HeartButton>
-              </Td>
-              <Td>
-                <Flex alignItems="center" gap={3}>
-                  <TrackIconBox>
-                    <Disc size={18} />
-                  </TrackIconBox>
-                  <Box>
-                    <Text fontWeight="semibold" color="text">
-                      {song.title}
-                    </Text>
-                    <Text fontSize={0} color="textMuted">
-                      Added {new Date(song.createdAt).toLocaleDateString()}
-                    </Text>
-                  </Box>
-                </Flex>
-              </Td>
-              <Td>
-                <Text color="text" fontWeight="medium">{song.artist}</Text>
-              </Td>
-              <Td>
-                <Text color="textSecondary">{song.album}</Text>
-              </Td>
-              <Td>
-                <Badge variant="primary">{song.genre}</Badge>
-              </Td>
-              <Td style={{ textAlign: 'right' }}>
-                <Flex justifyContent="flex-end" alignItems="center" gap={1}>
-                  <Button
-                    variant="ghost"
-                    buttonSize="sm"
-                    onClick={() => onEdit(song)}
-                    title="Edit Song"
-                    style={{ padding: '6px 8px', borderRadius: '6px' }}
+          {songs.map((song, index) => {
+            const isThisTrackPlaying = currentSong?.id === song.id && isPlaying;
+            const isThisCurrentTrack = currentSong?.id === song.id;
+
+            return (
+              <Tr key={song.id} isCurrent={isThisCurrentTrack}>
+                <Td style={{ color: 'inherit', opacity: 0.6, fontFamily: 'monospace', fontSize: '13px' }}>
+                  {(index + 1).toString().padStart(2, '0')}
+                </Td>
+                <Td style={{ padding: '14px 8px' }}>
+                  <HeartButton
+                    isFavorite={song.isFavorite}
+                    onClick={() => onToggleFavorite?.(song)}
+                    title={song.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    aria-label="Toggle favorite"
                   >
-                    <Edit2 size={15} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    buttonSize="sm"
-                    onClick={() => onDelete(song)}
-                    title="Delete Song"
-                    style={{ padding: '6px 8px', borderRadius: '6px' }}
-                  >
-                    <Trash2 size={15} />
-                  </Button>
-                </Flex>
-              </Td>
-            </Tr>
-          ))}
+                    <Heart
+                      size={16}
+                      fill={song.isFavorite ? '#FF4B5C' : 'transparent'}
+                    />
+                  </HeartButton>
+                </Td>
+                <Td>
+                  <Flex alignItems="center" gap={3}>
+                    <TrackIconBtn
+                      isPlaying={isThisTrackPlaying}
+                      onClick={() => handlePlayClick(song)}
+                      title={isThisTrackPlaying ? 'Pause' : 'Play track'}
+                      aria-label="Play song"
+                    >
+                      {isThisTrackPlaying ? <Pause size={16} fill="#fff" /> : <Play size={16} fill="currentColor" style={{ marginLeft: '2px' }} />}
+                    </TrackIconBtn>
+                    <Box>
+                      <Text fontWeight="semibold" color={isThisCurrentTrack ? 'primary' : 'text'}>
+                        {song.title}
+                      </Text>
+                      <Text fontSize={0} color="textMuted">
+                        Added {new Date(song.createdAt).toLocaleDateString()}
+                      </Text>
+                    </Box>
+                  </Flex>
+                </Td>
+                <Td>
+                  <Text color="text" fontWeight="medium">{song.artist}</Text>
+                </Td>
+                <Td>
+                  <Text color="textSecondary">{song.album}</Text>
+                </Td>
+                <Td>
+                  <Badge variant="primary">{song.genre}</Badge>
+                </Td>
+                <Td style={{ textAlign: 'right' }}>
+                  <Flex justifyContent="flex-end" alignItems="center" gap={1}>
+                    <Button
+                      variant="ghost"
+                      buttonSize="sm"
+                      onClick={() => onEdit(song)}
+                      title="Edit Song"
+                      style={{ padding: '6px 8px', borderRadius: '6px' }}
+                    >
+                      <Edit2 size={15} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      buttonSize="sm"
+                      onClick={() => onDelete(song)}
+                      title="Delete Song"
+                      style={{ padding: '6px 8px', borderRadius: '6px' }}
+                    >
+                      <Trash2 size={15} />
+                    </Button>
+                  </Flex>
+                </Td>
+              </Tr>
+            );
+          })}
         </tbody>
       </StyledTable>
     </TableWrapper>

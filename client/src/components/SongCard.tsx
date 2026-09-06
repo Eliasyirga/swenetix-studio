@@ -1,20 +1,22 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Edit2, Trash2, Disc, Heart } from 'lucide-react';
+import { Edit2, Trash2, Disc, Heart, Play, Pause } from 'lucide-react';
 import { Song } from '../types/song';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { Card } from './Card';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Flex, Box } from './common/Flex';
 import { Heading, Text } from './common/Text';
 
-const CardContainer = styled(Card)`
+const CardContainer = styled(Card)<{ isCurrent?: boolean }>`
   padding: 18px;
   position: relative;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border-color: ${(props) => (props.isCurrent ? props.theme.colors.primary : undefined)};
 
   &:hover {
     transform: translateY(-3px);
@@ -23,17 +25,26 @@ const CardContainer = styled(Card)`
   }
 `;
 
-const CoverArtwork = styled.div`
+const CoverArtwork = styled.button<{ isPlaying?: boolean }>`
   width: 44px;
   height: 44px;
   border-radius: ${(props) => props.theme.radii.md};
-  background-color: ${(props) => props.theme.colors.primaryLight};
+  background-color: ${(props) =>
+    props.isPlaying ? props.theme.colors.primary : props.theme.colors.primaryLight};
   border: 1px solid ${(props) => props.theme.colors.primaryBorder};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${(props) => props.theme.colors.primary};
+  color: ${(props) => (props.isPlaying ? '#FFFFFF' : props.theme.colors.primary)};
   flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primary};
+    color: #FFFFFF;
+    transform: scale(1.08);
+  }
 `;
 
 const HeartButton = styled.button<{ isFavorite?: boolean }>`
@@ -68,13 +79,36 @@ export const SongCard: React.FC<SongCardProps> = ({
   onDelete,
   onToggleFavorite,
 }) => {
+  const { currentSong, isPlaying, playSong, togglePlay } = useAudioPlayer();
+  const isThisCurrentTrack = currentSong?.id === song.id;
+  const isThisTrackPlaying = isThisCurrentTrack && isPlaying;
+
+  const handlePlayClick = () => {
+    if (isThisCurrentTrack) {
+      togglePlay();
+    } else {
+      playSong(song);
+    }
+  };
+
   return (
-    <CardContainer>
+    <CardContainer isCurrent={isThisCurrentTrack}>
       <Box>
         <Flex alignItems="flex-start" justifyContent="space-between" gap={2} mb={3}>
           <Flex alignItems="flex-start" gap={3} overflow="hidden" flex={1}>
-            <CoverArtwork>
-              <Disc size={22} />
+            <CoverArtwork
+              isPlaying={isThisTrackPlaying}
+              onClick={handlePlayClick}
+              title={isThisTrackPlaying ? 'Pause track' : 'Play track'}
+              aria-label="Play song"
+            >
+              {isThisTrackPlaying ? (
+                <Pause size={20} fill="#fff" />
+              ) : isThisCurrentTrack ? (
+                <Play size={20} fill="#fff" style={{ marginLeft: '2px' }} />
+              ) : (
+                <Disc size={22} />
+              )}
             </CoverArtwork>
 
             <Box flex={1} overflow="hidden">
@@ -84,7 +118,7 @@ export const SongCard: React.FC<SongCardProps> = ({
                 fontWeight="bold"
                 truncate
                 title={song.title}
-                color="text"
+                color={isThisCurrentTrack ? 'primary' : 'text'}
                 mb={1}
               >
                 {song.title}

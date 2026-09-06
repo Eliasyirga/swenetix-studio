@@ -13,6 +13,9 @@ import { useAppDispatch } from './store/store';
 import { fetchSongsRequest } from './store/songsSlice';
 import { fetchStatisticsRequest } from './store/statisticsSlice';
 
+import { AudioPlayerProvider } from './context/AudioPlayerContext';
+import { AudioPlayerBar } from './components/AudioPlayerBar';
+
 const AppContainer = styled.div`
   height: 100vh;
   width: 100vw;
@@ -38,11 +41,11 @@ const MainContent = styled.main`
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px 28px 48px 28px;
+  padding: 24px 28px 100px 28px;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    padding: 16px 12px 32px 12px;
+    padding: 16px 12px 90px 12px;
   }
 `;
 
@@ -64,6 +67,7 @@ const AppInner: React.FC = () => {
         <LoadingScreen />
         <AppRoutes />
         <Toast />
+        <AudioPlayerBar />
       </>
     );
   }
@@ -78,6 +82,7 @@ const AppInner: React.FC = () => {
           <AppRoutes />
         </MainContent>
       </MainContentArea>
+      <AudioPlayerBar />
       <Toast />
     </AppContainer>
   );
@@ -88,7 +93,9 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <CustomThemeProvider>
         <SidebarProvider>
-          <AppInner />
+          <AudioPlayerProvider>
+            <AppInner />
+          </AudioPlayerProvider>
         </SidebarProvider>
       </CustomThemeProvider>
     </BrowserRouter>

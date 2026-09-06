@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   Table as TableIcon,
   Heart,
+  Download,
 } from 'lucide-react';
 import { Box, Flex, Grid } from '../components/common/Flex';
 import { Heading, Text } from '../components/common/Text';
@@ -144,6 +145,31 @@ export const Songs: React.FC = () => {
     dispatch(deleteSongRequest(songId));
   };
 
+  const handleExportCSV = () => {
+    if (!songs.length) return;
+    const headers = ['ID', 'Title', 'Artist', 'Album', 'Genre', 'Duration (s)', 'Is Favorite', 'Created At'];
+    const rows = songs.map((s) => [
+      `"${s.id}"`,
+      `"${s.title.replace(/"/g, '""')}"`,
+      `"${s.artist.replace(/"/g, '""')}"`,
+      `"${s.album.replace(/"/g, '""')}"`,
+      `"${s.genre}"`,
+      s.duration || 0,
+      s.isFavorite ? 'Yes' : 'No',
+      `"${new Date(s.createdAt).toISOString()}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `swenetix_songs_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const isFiltered =
     (filters.search && filters.search.trim() !== '') ||
     filters.genre !== 'All' ||
@@ -173,7 +199,18 @@ export const Songs: React.FC = () => {
           </Text>
         </Box>
 
-        <Flex alignItems="center" gap={2}>
+        <Flex alignItems="center" gap={2} flexWrap="wrap">
+          {/* Export CSV button */}
+          <Button
+            variant="secondary"
+            buttonSize="sm"
+            onClick={handleExportCSV}
+            title="Export songs to CSV"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Download size={15} /> Export CSV
+          </Button>
+
           {/* View toggle */}
           <Flex
             bg="surface"
