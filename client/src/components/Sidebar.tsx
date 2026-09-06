@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
@@ -14,6 +14,7 @@ import {
   Moon,
   LayoutDashboard,
   PanelLeftClose,
+  PanelLeftOpen,
   Sparkles,
   X,
 } from 'lucide-react';
@@ -59,7 +60,7 @@ const SidebarContainer = styled.aside<{ isCollapsed: boolean; isMobileOpen: bool
   user-select: none;
   box-shadow: ${(props) => props.theme.shadows.sm};
   z-index: 60;
-  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Custom subtle scrollbar */
   &::-webkit-scrollbar {
@@ -83,7 +84,7 @@ const SidebarContainer = styled.aside<{ isCollapsed: boolean; isMobileOpen: bool
 `;
 
 const BrandSection = styled.div<{ isCollapsed: boolean }>`
-  padding: 16px ${(props) => (props.isCollapsed ? '12px' : '18px')};
+  padding: 16px ${(props) => (props.isCollapsed ? '14px' : '18px')};
   border-bottom: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   cursor: pointer;
   transition: all 0.2s ease;
@@ -97,11 +98,11 @@ const BrandSection = styled.div<{ isCollapsed: boolean }>`
 `;
 
 const NavSection = styled.div<{ isCollapsed?: boolean }>`
-  padding: ${(props) => (props.isCollapsed ? '12px 8px' : '16px 12px')};
+  padding: ${(props) => (props.isCollapsed ? '12px 10px' : '16px 12px')};
   display: flex;
   flex-direction: column;
   align-items: ${(props) => (props.isCollapsed ? 'center' : 'stretch')};
-  gap: ${(props) => (props.isCollapsed ? '8px' : '4px')};
+  gap: ${(props) => (props.isCollapsed ? '10px' : '4px')};
 `;
 
 const SectionTitle = styled.div<{ isCollapsed: boolean }>`
@@ -122,21 +123,21 @@ const StyledNavLink = styled(NavLink)<{ isCollapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${(props) => (props.isCollapsed ? 'center' : 'space-between')};
-  width: ${(props) => (props.isCollapsed ? '44px' : '100%')};
-  height: ${(props) => (props.isCollapsed ? '44px' : 'auto')};
+  width: ${(props) => (props.isCollapsed ? '46px' : '100%')};
+  height: ${(props) => (props.isCollapsed ? '46px' : 'auto')};
   padding: ${(props) => (props.isCollapsed ? '0' : '10px 14px')};
-  border-radius: ${(props) => (props.isCollapsed ? '10px' : props.theme.radii.md)};
+  border-radius: ${(props) => (props.isCollapsed ? '12px' : props.theme.radii.md)};
   color: ${(props) => props.theme.colors.textSecondary};
   font-size: 13.5px;
   font-weight: 500;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
   text-decoration: none;
   position: relative;
 
   &:hover {
     color: ${(props) => props.theme.colors.text};
     background-color: ${(props) => props.theme.colors.surfaceLight};
-    transform: ${(props) => (props.isCollapsed ? 'scale(1.05)' : 'none')};
+    transform: ${(props) => (props.isCollapsed ? 'scale(1.06)' : 'none')};
   }
 
   &.active {
@@ -151,6 +152,7 @@ const StyledNavLink = styled(NavLink)<{ isCollapsed: boolean }>`
     height: auto;
     justify-content: space-between;
     padding: 10px 14px;
+    border-radius: ${(props) => props.theme.radii.md};
   }
 `;
 
@@ -158,22 +160,22 @@ const GenrePill = styled.button<{ isActive?: boolean; isCollapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${(props) => (props.isCollapsed ? 'center' : 'space-between')};
-  width: ${(props) => (props.isCollapsed ? '40px' : '100%')};
-  height: ${(props) => (props.isCollapsed ? '40px' : 'auto')};
+  width: ${(props) => (props.isCollapsed ? '44px' : '100%')};
+  height: ${(props) => (props.isCollapsed ? '44px' : 'auto')};
   padding: ${(props) => (props.isCollapsed ? '0' : '8px 12px')};
-  border-radius: ${(props) => (props.isCollapsed ? '8px' : props.theme.radii.md)};
+  border-radius: ${(props) => (props.isCollapsed ? '10px' : props.theme.radii.md)};
   background: ${(props) => (props.isActive ? props.theme.colors.primaryLight : 'transparent')};
   color: ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.textSecondary)};
   border: 1px solid ${(props) => (props.isActive ? props.theme.colors.primaryBorder : 'transparent')};
   font-size: 13px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 
   &:hover {
     background: ${(props) => props.theme.colors.surfaceLight};
     color: ${(props) => props.theme.colors.text};
-    transform: ${(props) => (props.isCollapsed ? 'scale(1.05)' : 'none')};
+    transform: ${(props) => (props.isCollapsed ? 'scale(1.06)' : 'none')};
   }
 `;
 
@@ -187,13 +189,33 @@ const CountBadge = styled.span<{ isActive?: boolean }>`
   color: ${(props) => (props.isActive ? '#FFFFFF' : props.theme.colors.textMuted)};
 `;
 
+const MiniBadge = styled.span`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: ${(props) => props.theme.colors.primary};
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+`;
+
 const BottomFooterBox = styled.div<{ isCollapsed?: boolean }>`
   margin-top: auto;
-  padding: ${(props) => (props.isCollapsed ? '12px 8px' : '14px')};
+  padding: ${(props) => (props.isCollapsed ? '14px 10px' : '14px')};
   border-top: 1px solid ${(props) => props.theme.colors.surfaceBorder};
   background-color: ${(props) => props.theme.colors.backgroundAlt};
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 `;
 
 const PrimaryActionButton = styled.button<{ isCollapsed: boolean }>`
@@ -201,8 +223,8 @@ const PrimaryActionButton = styled.button<{ isCollapsed: boolean }>`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: ${(props) => (props.isCollapsed ? '44px' : '100%')};
-  height: ${(props) => (props.isCollapsed ? '44px' : 'auto')};
+  width: ${(props) => (props.isCollapsed ? '46px' : '100%')};
+  height: ${(props) => (props.isCollapsed ? '46px' : 'auto')};
   padding: ${(props) => (props.isCollapsed ? '0' : '11px 14px')};
   border-radius: ${(props) => (props.isCollapsed ? '12px' : props.theme.radii.md)};
   background: linear-gradient(135deg, ${(props) => props.theme.colors.primary}, #FF4B5C);
@@ -215,7 +237,7 @@ const PrimaryActionButton = styled.button<{ isCollapsed: boolean }>`
   box-shadow: 0 4px 14px rgba(217, 28, 46, 0.35);
 
   &:hover {
-    transform: translateY(-2px) scale(${(props) => (props.isCollapsed ? 1.06 : 1)});
+    transform: translateY(-2px) scale(${(props) => (props.isCollapsed ? 1.08 : 1)});
     box-shadow: 0 6px 18px rgba(217, 28, 46, 0.5);
   }
 
@@ -228,20 +250,21 @@ const ThemeSwitchBtn = styled.button<{ isCollapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${(props) => (props.isCollapsed ? 'center' : 'space-between')};
-  width: ${(props) => (props.isCollapsed ? '44px' : '100%')};
-  height: ${(props) => (props.isCollapsed ? '44px' : 'auto')};
+  width: ${(props) => (props.isCollapsed ? '46px' : '100%')};
+  height: ${(props) => (props.isCollapsed ? '46px' : 'auto')};
   background: ${(props) => props.theme.colors.surface};
   border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
-  border-radius: ${(props) => (props.isCollapsed ? '10px' : props.theme.radii.md)};
+  border-radius: ${(props) => (props.isCollapsed ? '12px' : props.theme.radii.md)};
   padding: ${(props) => (props.isCollapsed ? '0' : '8px 12px')};
   cursor: pointer;
   color: ${(props) => props.theme.colors.text};
   font-size: 13px;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 
   &:hover {
     border-color: ${(props) => props.theme.colors.primary};
-    transform: ${(props) => (props.isCollapsed ? 'scale(1.05)' : 'none')};
+    background: ${(props) => props.theme.colors.surfaceHover};
+    transform: ${(props) => (props.isCollapsed ? 'scale(1.06)' : 'none')};
   }
 `;
 
@@ -260,7 +283,41 @@ const BrandIconBox = styled(Box)`
   transition: transform 0.2s ease;
 
   &:hover {
-    transform: scale(1.05);
+    transform: scale(1.08);
+  }
+`;
+
+const FloatingTooltip = styled.div<{ top: number; visible: boolean }>`
+  position: fixed;
+  left: 78px;
+  top: ${(props) => props.top}px;
+  transform: translateY(-50%) translateX(${(props) => (props.visible ? '0' : '-8px')});
+  opacity: ${(props) => (props.visible ? 1 : 0)};
+  pointer-events: none;
+  background-color: ${(props) => props.theme.colors.surfaceHover};
+  color: ${(props) => props.theme.colors.text};
+  border: 1px solid ${(props) => props.theme.colors.surfaceBorder};
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  z-index: 9999;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent ${(props) => props.theme.colors.surfaceBorder} transparent transparent;
   }
 `;
 
@@ -278,8 +335,43 @@ export const Sidebar: React.FC = () => {
   const totalSongs = pagination.total || stats?.overview.totalSongs || 0;
   const genreList = stats?.songsByGenre || [];
 
+  // Floating hover tooltip state for collapsed rail on desktop
+  const [tooltip, setTooltip] = useState<{ text: string; top: number; visible: boolean; extra?: string }>({
+    text: '',
+    top: 0,
+    visible: false,
+  });
+
+  const showTooltip = (text: string, e: React.MouseEvent, extra?: string) => {
+    if (!isCollapsed || window.innerWidth <= 900) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({
+      text,
+      top: rect.top + rect.height / 2,
+      visible: true,
+      extra,
+    });
+  };
+
+  const hideTooltip = () => {
+    setTooltip((prev) => ({ ...prev, visible: false }));
+  };
+
+  // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar on desktop
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleSidebar]);
+
   const handleGenreClick = (genre: string) => {
     closeMobileSidebar();
+    hideTooltip();
     dispatch(setGenreFilter(genre));
     if (location.pathname !== '/songs') {
       navigate('/songs');
@@ -288,18 +380,42 @@ export const Sidebar: React.FC = () => {
 
   const handleAddSong = () => {
     closeMobileSidebar();
+    hideTooltip();
     dispatch(openCreateModal());
   };
 
   return (
     <>
       <BackdropOverlay isMobileOpen={isMobileOpen} onClick={closeMobileSidebar} />
+
+      {/* Floating tooltip for collapsed rail */}
+      {tooltip.visible && isCollapsed && (
+        <FloatingTooltip top={tooltip.top} visible={tooltip.visible}>
+          <span>{tooltip.text}</span>
+          {tooltip.extra && (
+            <span
+              style={{
+                fontSize: '10px',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: theme.colors.primary,
+                color: '#fff',
+                fontFamily: 'monospace',
+              }}
+            >
+              {tooltip.extra}
+            </span>
+          )}
+        </FloatingTooltip>
+      )}
+
       <SidebarContainer isCollapsed={isCollapsed} isMobileOpen={isMobileOpen}>
         {/* Brand Header with Interactive Pop up / Pop off Logo Toggle */}
         <BrandSection
           isCollapsed={isCollapsed}
           onClick={toggleSidebar}
-          title={isCollapsed ? 'Click to Expand Sidebar' : 'Click to Collapse Sidebar'}
+          onMouseEnter={(e) => showTooltip(isCollapsed ? 'Expand Sidebar (Ctrl+B)' : 'Collapse Sidebar', e)}
+          onMouseLeave={hideTooltip}
         >
           <Flex alignItems="center" gap={3} justifyContent={isCollapsed ? 'center' : 'flex-start'}>
             <BrandIconBox>
@@ -328,16 +444,35 @@ export const Sidebar: React.FC = () => {
                 toggleSidebar();
               }
             }}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
+            {/* Mobile close cross */}
             <Box display={['block', 'none']}>
               <X size={20} />
             </Box>
-            <Box display={['none', isCollapsed ? 'none' : 'block']}>
-              <PanelLeftClose size={16} />
-            </Box>
+            {/* Desktop expanded close arrow */}
+            {!isCollapsed && (
+              <Box display={['none', 'block']}>
+                <PanelLeftClose size={16} />
+              </Box>
+            )}
           </Box>
         </BrandSection>
+
+        {/* Collapsed Expand Quick Action Icon */}
+        {isCollapsed && (
+          <NavSection isCollapsed={isCollapsed} style={{ paddingBottom: '4px' }}>
+            <GenrePill
+              isCollapsed={isCollapsed}
+              onClick={toggleSidebar}
+              onMouseEnter={(e) => showTooltip('Expand Sidebar (Ctrl+B)', e)}
+              onMouseLeave={hideTooltip}
+              style={{ height: '32px', opacity: 0.7 }}
+            >
+              <PanelLeftOpen size={16} color={theme.colors.textMuted} />
+            </GenrePill>
+          </NavSection>
+        )}
 
         {/* Main Navigation */}
         <NavSection isCollapsed={isCollapsed}>
@@ -345,8 +480,12 @@ export const Sidebar: React.FC = () => {
           <StyledNavLink
             to="/"
             isCollapsed={isCollapsed}
-            title="Showcase Home"
-            onClick={closeMobileSidebar}
+            onClick={() => {
+              closeMobileSidebar();
+              hideTooltip();
+            }}
+            onMouseEnter={(e) => showTooltip('Showcase Home', e)}
+            onMouseLeave={hideTooltip}
           >
             <Flex alignItems="center" gap={2} justifyContent={isCollapsed ? 'center' : 'flex-start'}>
               <Sparkles size={18} />
@@ -359,21 +498,30 @@ export const Sidebar: React.FC = () => {
             to="/songs"
             end
             isCollapsed={isCollapsed}
-            title={`Song Library (${totalSongs})`}
-            onClick={closeMobileSidebar}
+            onClick={() => {
+              closeMobileSidebar();
+              hideTooltip();
+            }}
+            onMouseEnter={(e) => showTooltip('Song Library', e, `${totalSongs}`)}
+            onMouseLeave={hideTooltip}
           >
             <Flex alignItems="center" gap={2} justifyContent={isCollapsed ? 'center' : 'flex-start'}>
               <Layers size={18} />
               {!isCollapsed && <span className="nav-label">Song Library</span>}
             </Flex>
             {!isCollapsed && <CountBadge>{totalSongs}</CountBadge>}
+            {isCollapsed && totalSongs > 0 && <MiniBadge>{totalSongs > 99 ? '99+' : totalSongs}</MiniBadge>}
           </StyledNavLink>
 
           <StyledNavLink
             to="/statistics"
             isCollapsed={isCollapsed}
-            title="Statistics"
-            onClick={closeMobileSidebar}
+            onClick={() => {
+              closeMobileSidebar();
+              hideTooltip();
+            }}
+            onMouseEnter={(e) => showTooltip('Statistics & Analytics', e)}
+            onMouseLeave={hideTooltip}
           >
             <Flex alignItems="center" gap={2} justifyContent={isCollapsed ? 'center' : 'flex-start'}>
               <BarChart3 size={18} />
@@ -385,8 +533,12 @@ export const Sidebar: React.FC = () => {
           <StyledNavLink
             to="/overview"
             isCollapsed={isCollapsed}
-            title="Overview Dashboard"
-            onClick={closeMobileSidebar}
+            onClick={() => {
+              closeMobileSidebar();
+              hideTooltip();
+            }}
+            onMouseEnter={(e) => showTooltip('Overview Dashboard', e)}
+            onMouseLeave={hideTooltip}
           >
             <Flex alignItems="center" gap={2} justifyContent={isCollapsed ? 'center' : 'flex-start'}>
               <LayoutDashboard size={18} />
@@ -401,7 +553,8 @@ export const Sidebar: React.FC = () => {
           <PrimaryActionButton
             isCollapsed={isCollapsed}
             onClick={handleAddSong}
-            title="Add New Song"
+            onMouseEnter={(e) => showTooltip('Add New Song', e)}
+            onMouseLeave={hideTooltip}
           >
             {isCollapsed ? <Plus size={20} /> : (
               <>
@@ -439,7 +592,7 @@ export const Sidebar: React.FC = () => {
         {/* Collapsed genre shortcuts */}
         {isCollapsed && genreList.length > 0 && (
           <NavSection isCollapsed={isCollapsed} style={{ flex: 1, overflowY: 'auto' }}>
-            {genreList.slice(0, 5).map((g) => {
+            {genreList.slice(0, 6).map((g) => {
               const isSelected = filters.genre === g.genre;
               return (
                 <GenrePill
@@ -447,7 +600,8 @@ export const Sidebar: React.FC = () => {
                   isActive={isSelected}
                   isCollapsed={isCollapsed}
                   onClick={() => handleGenreClick(g.genre)}
-                  title={`${g.genre} (${g.count} songs)`}
+                  onMouseEnter={(e) => showTooltip(g.genre, e, `${g.count}`)}
+                  onMouseLeave={hideTooltip}
                 >
                   <Radio size={15} color={isSelected ? theme.colors.primary : theme.colors.textMuted} />
                 </GenrePill>
@@ -461,7 +615,8 @@ export const Sidebar: React.FC = () => {
           <ThemeSwitchBtn
             isCollapsed={isCollapsed}
             onClick={toggleTheme}
-            title={mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            onMouseEnter={(e) => showTooltip(mode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode', e)}
+            onMouseLeave={hideTooltip}
           >
             <Flex alignItems="center" gap={2} justifyContent={isCollapsed ? 'center' : 'flex-start'}>
               {mode === 'light' ? <Moon size={16} color={theme.colors.primary} /> : <Sun size={16} color={theme.colors.primary} />}
@@ -473,3 +628,4 @@ export const Sidebar: React.FC = () => {
     </>
   );
 };
+
